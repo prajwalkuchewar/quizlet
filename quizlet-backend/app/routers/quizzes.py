@@ -30,7 +30,7 @@ def to_flashcard_set_out(card_set: FlashcardSet) -> FlashcardSetOut:
 
 @router.post("/flashcards/generate", response_model=FlashcardSetOut, status_code=201,
              dependencies=[Depends(limit_by_user("flashcards", settings.rate_limit_llm_per_minute))],
-             tags=["quiz service - flashcards"], summary="Generate a saved flashcard set from your materials")
+             tags=["flashcards"], summary="Generate a saved flashcard set from your materials")
 async def generate_flashcard_set(request: Request, body: GenerateFlashcardsInput, db: Session = Depends(get_db),
                                  user: User = Depends(get_current_user)):
     materials, matches, context = await run_in_threadpool(
@@ -46,7 +46,7 @@ def _save_and_export(db: Session, user: User, body: GenerateFlashcardsInput, mat
 
 
 @router.get("/flashcards/{set_id}", response_model=FlashcardSetOut,
-            tags=["quiz service - flashcards"], summary="Open one of your generated flashcard sets")
+            tags=["flashcards"], summary="Open one of your generated flashcard sets")
 def get_flashcard_set(set_id: int, db: Session = Depends(get_db), user: User = Depends(get_current_user)):
     card_set = db.query(FlashcardSet).filter(FlashcardSet.id == set_id, FlashcardSet.owner_id == user.id).first()
     if not card_set:
@@ -54,7 +54,7 @@ def get_flashcard_set(set_id: int, db: Session = Depends(get_db), user: User = D
     return to_flashcard_set_out(card_set)
 
 
-@router.post("/flashcards/{set_id}/review", tags=["quiz service - flashcards"],
+@router.post("/flashcards/{set_id}/review", tags=["flashcards"],
              summary="Record whether you recalled a flashcard")
 def review_flashcard(set_id: int, body: FlashcardReviewInput, db: Session = Depends(get_db),
                      user: User = Depends(get_current_user)):
@@ -66,7 +66,7 @@ def review_flashcard(set_id: int, body: FlashcardReviewInput, db: Session = Depe
     return {"message": "Review recorded", "remembered": body.remembered}
 
 
-@router.get("/flashcards/{set_id}/progress", tags=["quiz service - flashcards"],
+@router.get("/flashcards/{set_id}/progress", tags=["flashcards"],
             summary="Get your recall totals for a flashcard set")
 def flashcard_progress(set_id: int, db: Session = Depends(get_db), user: User = Depends(get_current_user)):
     card_set = db.query(FlashcardSet).filter(FlashcardSet.id == set_id, FlashcardSet.owner_id == user.id).first()
@@ -97,7 +97,7 @@ def list_quizzes(db: Session = Depends(get_db), _user: User = Depends(get_curren
     return [to_quiz_out(q) for q in db.query(Quiz).order_by(Quiz.id).all()]
 
 
-@router.get("/flashcards", response_model=list[FlashcardSetSummary], tags=["quiz service - flashcards"],
+@router.get("/flashcards", response_model=list[FlashcardSetSummary], tags=["flashcards"],
             summary="List your generated flashcard sets with recall totals")
 def list_flashcard_sets(db: Session = Depends(get_db), user: User = Depends(get_current_user)):
     card_sets = db.query(FlashcardSet).filter(FlashcardSet.owner_id == user.id).order_by(FlashcardSet.id.desc()).all()

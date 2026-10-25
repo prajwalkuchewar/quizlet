@@ -25,7 +25,7 @@ ollama pull llama3.2
 ollama pull nomic-embed-text
 ```
 
-Keep Ollama running at `http://localhost:11434` (or set `LLM_BASE_URL`, `LLM_CHAT_MODEL`, and `LLM_EMBEDDING_MODEL` in `.env`). `/llm/status` reports whether the provider can be reached. The API and its service modules still run as one FastAPI process; Ollama supplies the local model runtime.
+Keep Ollama running at `http://localhost:11434` (or set `LLM_BASE_URL`, `LLM_CHAT_MODEL`, and `LLM_EMBEDDING_MODEL` in `.env`). `/llm/status` reports whether the provider can be reached. The API runs as one FastAPI process; Ollama supplies the local model runtime.
 
 ## Material-to-flashcard workflow
 

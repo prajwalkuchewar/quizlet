@@ -4,7 +4,7 @@ import logging
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from sqlalchemy import inspect, text
+from sqlalchemy import text
 from sqlalchemy.exc import SQLAlchemyError
 from starlette.middleware.base import BaseHTTPMiddleware
 
@@ -19,37 +19,27 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name
 logger = logging.getLogger("quizlet")
 
 
-def add_missing_columns() -> None:
-    # create_all does not alter existing tables, so add columns introduced after a database was created.
-    columns = {column["name"] for column in inspect(engine).get_columns("flashcard_sets")}
-    if "created_at" not in columns:
-        column_type = models.FlashcardSet.__table__.c.created_at.type.compile(dialect=engine.dialect)
-        with engine.begin() as connection:
-            connection.execute(text(f"ALTER TABLE flashcard_sets ADD COLUMN created_at {column_type}"))
-
-
 @asynccontextmanager
 async def lifespan(_app: FastAPI):
     Base.metadata.create_all(bind=engine)
-    add_missing_columns()
     yield
 
 
 app = FastAPI(
     title="Quizlet Learning API",
     description=(
-        "A single-process API organized into auth, question, quiz, and LLM service modules. "
-        "The LLM module uses Ollama for embeddings and flashcard generation; it is not a separately run service. "
+        "One FastAPI application with auth, question bank, materials, quiz, flashcard, and LLM endpoints. "
+        "The LLM endpoints call Ollama for embeddings and generation. "
         "Swagger UI is available at `/docs` and the OpenAPI schema at `/openapi.json`."
     ),
     version="1.1.0",
     openapi_tags=[
         {"name": "auth", "description": "Signup, login, and the current user."},
         {"name": "questions", "description": "Admin question bank CRUD."},
-        {"name": "question service - materials", "description": "User-owned material ingestion and semantic search."},
+        {"name": "materials", "description": "User-owned material ingestion and semantic search."},
         {"name": "quiz", "description": "Quiz catalog, admin quiz creation, and scored attempts."},
-        {"name": "quiz service - flashcards", "description": "Generate, study, and review material-grounded flashcards."},
-        {"name": "LLM service", "description": "Health/status endpoint for the in-process Ollama integration."},
+        {"name": "flashcards", "description": "Generate, study, and review material-grounded flashcards."},
+        {"name": "llm", "description": "Health/status endpoint for the Ollama integration."},
     ],
     lifespan=lifespan,
 )

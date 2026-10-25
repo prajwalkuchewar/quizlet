@@ -12,7 +12,7 @@ from app.services.llm_service import answer_from_material_async
 from app.services.question_service import index_material, search_materials
 from app.services.rate_limit import limit_by_user
 
-router = APIRouter(prefix="/questions/materials", tags=["question service - materials"])
+router = APIRouter(prefix="/questions/materials", tags=["materials"])
 
 
 def material_out(material: Material) -> MaterialOut:
