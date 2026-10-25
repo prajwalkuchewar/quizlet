@@ -23,29 +23,38 @@ def verify_password(password: str, hashed: str) -> bool:
     return passwords.verify(password, hashed)
 
 
-def create_token(username: str) -> str:
+def create_token(username: str, session_id: str) -> str:
     expires = datetime.now(timezone.utc) + timedelta(minutes=settings.jwt_access_token_minutes)
-    return jwt.encode({"sub": username, "exp": expires}, settings.jwt_secret_key, algorithm=ALGORITHM)
+    return jwt.encode({"sub": username, "sid": session_id, "exp": expires}, settings.jwt_secret_key,
+                      algorithm=ALGORITHM)
+
+
+def _decode_claims(credentials: HTTPAuthorizationCredentials | None) -> dict:
+    unauth = HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid or missing bearer token")
+    if not credentials:
+        raise unauth
+    try:
+        payload = jwt.decode(credentials.credentials, settings.jwt_secret_key, algorithms=[ALGORITHM])
+    except JWTError:
+        raise unauth
+    if not payload.get("sub") or not payload.get("sid"):
+        raise unauth
+    return payload
 
 
 def get_current_user(
     credentials: HTTPAuthorizationCredentials | None = Depends(bearer),
     db: Session = Depends(get_db),
 ) -> User:
-    unauth = HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid or missing bearer token")
-    if not credentials:
-        raise unauth
-    try:
-        payload = jwt.decode(credentials.credentials, settings.jwt_secret_key, algorithms=[ALGORITHM])
-        username = payload.get("sub")
-        if not username:
-            raise unauth
-    except JWTError:
-        raise unauth
-    user = db.query(User).filter(User.username == username).first()
+    payload = _decode_claims(credentials)
+    user = db.query(User).filter(User.username == payload["sub"]).first()
     if not user:
-        raise unauth
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid or missing bearer token")
     return user
+
+
+def get_current_session_id(credentials: HTTPAuthorizationCredentials | None = Depends(bearer)) -> str:
+    return _decode_claims(credentials)["sid"]
 
 
 def require_admin(user: User = Depends(get_current_user)) -> User:

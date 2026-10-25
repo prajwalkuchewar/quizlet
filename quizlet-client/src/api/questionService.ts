@@ -66,36 +66,3 @@ export const addQuestion = async (
     handleError(error);
   }
 };
-
-// export const updateQuestion = async (data: UpdateQuestionDTO) => {
-//   return await axios.put(`${QUESTION_API_URL}/${data.id}`, data, {
-//     headers: {
-//       Authorization: `Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1c2VyMiIsImlhdCI6MTcyODYyMDIxOCwiZXhwIjoxNzI4NjIyMDE4fQ.epabxam3WJkODnWG7vAPLpeeSzyipUsBBRt_43QZV50`, // Add JWT token to Authorization header
-//     },
-//   });
-// };
-
-// export const deleteQuestion = async (data: DeleteQuestionDTO) => {
-//   return await axios.delete(`${QUESTION_API_URL}/${data.id}`, {
-//     headers: {
-//       Authorization: `Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1c2VyMiIsImlhdCI6MTcyODYyMDIxOCwiZXhwIjoxNzI4NjIyMDE4fQ.epabxam3WJkODnWG7vAPLpeeSzyipUsBBRt_43QZV50`, // Add JWT token to Authorization header
-//     },
-//   });
-// };
-
-// export const getQuestionsByCategory = async (
-//   data: GetQuestionsByCategoryDTO,
-// ) => {
-//   return await axios.get(`${QUESTION_API_URL}/category/${data.category}`, {
-//     headers: {
-//       Authorization: `Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1c2VyMiIsImlhdCI6MTcyODYyMDIxOCwiZXhwIjoxNzI4NjIyMDE4fQ.epabxam3WJkODnWG7vAPLpeeSzyipUsBBRt_43QZV50`, // Add JWT token to Authorization header
-//     },
-//   });
-// };
-// export const getAllQuestions = async () => {
-//   return await axios.get(`${QUESTION_API_URL}`, {
-//     headers: {
-//       Authorization: `Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1c2VyMiIsImlhdCI6MTcyODYyMDIxOCwiZXhwIjoxNzI4NjIyMDE4fQ.epabxam3WJkODnWG7vAPLpeeSzyipUsBBRt_43QZV50`, // Add JWT token to Authorization header
-//     },
-//   });
-// };

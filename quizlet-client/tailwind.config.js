@@ -8,7 +8,18 @@ export default {
     "node_modules/preline/dist/*.js",
   ],
   theme: {
-    extend: {},
+    extend: {
+      colors: {
+        lightGreen: "#16a34a",
+        primary: {
+          300: "#93c5fd",
+          500: "#3b82f6",
+          600: "#2563eb",
+          700: "#1d4ed8",
+          800: "#1e40af",
+        },
+      },
+    },
   },
   plugins: [require("preline/plugin")],
 };

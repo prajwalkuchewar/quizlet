@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Quizlet">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#2563eb"/>
+      <stop offset="1" stop-color="#1e3a8a"/>
+    </linearGradient>
+  </defs>
+  <rect x="2" y="2" width="60" height="60" rx="16" fill="url(#bg)"/>
+  <rect x="14" y="18" width="30" height="22" rx="4" fill="#ffffff" fill-opacity="0.55" transform="rotate(-8 29 29)"/>
+  <rect x="18" y="22" width="30" height="22" rx="4" fill="#ffffff"/>
+  <path d="M26 30h14M26 36h9" stroke="#1e3a8a" stroke-width="3" stroke-linecap="round"/>
+  <circle cx="48" cy="18" r="6" fill="#facc15"/>
+</svg>

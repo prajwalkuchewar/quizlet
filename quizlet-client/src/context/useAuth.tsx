@@ -2,7 +2,7 @@ import axios from "axios";
 import React, { createContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import { loginAPI, registerAPI } from "../api/authService";
+import { loginAPI, logoutAPI, registerAPI } from "../api/authService";
 import { UserProfile } from "../models/User";
 
 type UserContextType = {
@@ -16,7 +16,7 @@ type UserContextType = {
     role: string,
   ) => void;
   loginUser: (username: string, password: string) => void;
-  logout: () => void;
+  logout: () => Promise<void>;
   isLoggedIn: () => boolean;
   isAdmin: () => boolean;
 };
@@ -98,7 +98,11 @@ export const UserProvider = ({ children }: Props) => {
     return user?.role === "ADMIN";
   };
 
-  const logout = () => {
+  const logout = async () => {
+    // Ends the server-side session so its uploaded materials are removed; local logout proceeds regardless.
+    if (token) {
+      await logoutAPI().catch(() => undefined);
+    }
     localStorage.removeItem("token");
     localStorage.removeItem("user");
     setAuthHeader(null);

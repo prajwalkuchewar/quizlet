@@ -1,11 +1,13 @@
+from uuid import uuid4
+
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from app.config import settings
 from app.database import get_db
-from app.models import User
+from app.models import Material, User
 from app.schemas import LoginRequest, SignupRequest
-from app.security import create_token, get_current_user, hash_password, verify_password
+from app.security import create_token, get_current_session_id, get_current_user, hash_password, verify_password
 from app.services.rate_limit import limit_by_ip
 
 router = APIRouter(prefix="/auth", tags=["auth"])
@@ -27,8 +29,22 @@ def login(body: LoginRequest, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.username == body.username).first()
     if not user or not verify_password(body.password, user.password):
         raise HTTPException(status_code=401, detail="Invalid credentials")
+    # Every login starts with an empty workspace; previous materials are removed.
+    for material in db.query(Material).filter(Material.owner_id == user.id).all():
+        db.delete(material)
+    db.commit()
     return {"message": "Login successful", "username": user.username, "firstname": user.firstname,
-            "lastname": user.lastname, "role": user.role, "token": create_token(user.username)}
+            "lastname": user.lastname, "role": user.role,
+            "token": create_token(user.username, uuid4().hex)}
+
+
+@router.post("/logout", status_code=204)
+def logout(db: Session = Depends(get_db), user: User = Depends(get_current_user),
+           session_id: str = Depends(get_current_session_id)):
+    for material in db.query(Material).filter(Material.owner_id == user.id,
+                                              Material.session_id == session_id).all():
+        db.delete(material)
+    db.commit()
 
 
 @router.get("/me")

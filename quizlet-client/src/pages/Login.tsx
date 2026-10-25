@@ -27,9 +27,33 @@ const Login = () => {
   };
 
   return (
-    <section className="bg-gradient-to-r from-blue-300 to-cyan-300">
-      <div className="flex flex-col items-center justify-center px-6 py-8 mx-auto opacity-80 md:h-screen lg:py-0">
-        <div className="w-full bg-white rounded-lg shadow dark:border md:mb-20 sm:max-w-md xl:p-0 dark:bg-gray-800 dark:border-gray-700">
+    <section className="min-h-screen bg-gradient-to-r from-blue-300 to-cyan-300">
+      <div className="grid items-center min-h-screen gap-10 px-6 py-8 mx-auto max-w-6xl lg:grid-cols-2">
+        <aside className="text-blue-900">
+          <img src="/logo.svg" alt="Quizlet logo" className="w-16 h-16 mb-6" />
+          <h2 className="text-3xl font-bold leading-tight md:text-4xl">
+            Turn your study materials into answers, flashcards and quizzes
+          </h2>
+          <ul className="mt-8 space-y-4">
+            <li className="flex gap-3">
+              <span aria-hidden="true">📄</span>
+              <span>Upload notes, PDFs or Markdown and index them for search.</span>
+            </li>
+            <li className="flex gap-3">
+              <span aria-hidden="true">💬</span>
+              <span>Ask questions and get answers with sources from your own material.</span>
+            </li>
+            <li className="flex gap-3">
+              <span aria-hidden="true">🧠</span>
+              <span>Generate flashcard sets and quizzes from what you are studying.</span>
+            </li>
+          </ul>
+          <p className="mt-8 text-sm text-blue-900/80">
+            Your uploads stay in your current session. Signing out clears them.
+          </p>
+        </aside>
+        <div className="flex justify-center">
+          <div className="w-full bg-white rounded-lg shadow dark:border sm:max-w-md xl:p-0 dark:bg-gray-800 dark:border-gray-700">
           <div className="p-6 space-y-4 md:space-y-6 sm:p-8">
             <h1 className="text-xl font-bold leading-tight tracking-tight text-gray-900 md:text-2xl dark:text-white">
               Sign in to your account
@@ -53,7 +77,7 @@ const Login = () => {
                   {...register("username")}
                 />
                 {errors.username ? (
-                  <p className="text-white">{errors.username.message}</p>
+                  <p className="text-sm text-red-600 dark:text-red-400">{errors.username.message}</p>
                 ) : (
                   ""
                 )}
@@ -73,7 +97,7 @@ const Login = () => {
                   {...register("password")}
                 />
                 {errors.password ? (
-                  <p className="text-white">{errors.password.message}</p>
+                  <p className="text-sm text-red-600 dark:text-red-400">{errors.password.message}</p>
                 ) : (
                   ""
                 )}
@@ -81,7 +105,7 @@ const Login = () => {
               <div className="flex items-center justify-between">
                 <a
                   href="#"
-                  className="text-sm font-medium text-white text-primary-600 hover:underline dark:text-primary-500"
+                  className="text-sm font-medium text-primary-600 hover:underline dark:text-primary-500"
                 >
                   Forgot password?
                 </a>
@@ -103,6 +127,7 @@ const Login = () => {
               </p>
             </form>
           </div>
+        </div>
         </div>
       </div>
     </section>

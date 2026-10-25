@@ -20,12 +20,14 @@ def split_into_chunks(content: str) -> list[str]:
     return [chunk for chunk in chunks if chunk]
 
 
-def index_material(db: Session, owner: User, title: str, content: str, filename: str | None = None) -> Material:
+def index_material(db: Session, owner: User, session_id: str, title: str, content: str,
+                   filename: str | None = None) -> Material:
     chunks = split_into_chunks(content)
     if not chunks:
         raise HTTPException(status_code=422, detail="No readable text found in the material")
     vectors = embed_texts(chunks)
-    material = Material(owner_id=owner.id, title=title[:255], filename=filename, content=content)
+    material = Material(owner_id=owner.id, session_id=session_id, title=title[:255], filename=filename,
+                        content=content)
     material.chunks = [MaterialChunk(chunk_index=index, content=chunk, embedding=vector)
                        for index, (chunk, vector) in enumerate(zip(chunks, vectors))]
     db.add(material)
@@ -34,9 +36,11 @@ def index_material(db: Session, owner: User, title: str, content: str, filename:
     return material
 
 
-def search_materials(db: Session, owner: User, query: str, material_ids: list[int] | None, limit: int):
+def search_materials(db: Session, owner: User, session_id: str, query: str, material_ids: list[int] | None,
+                     limit: int):
     vector = embed_texts([query])[0]
-    statement = db.query(MaterialChunk).join(Material).filter(Material.owner_id == owner.id)
+    statement = (db.query(MaterialChunk).join(Material)
+                 .filter(Material.owner_id == owner.id, Material.session_id == session_id))
     if material_ids:
         statement = statement.filter(Material.id.in_(material_ids))
     ranked = sorted(statement.all(), key=lambda chunk: cosine_similarity(vector, chunk.embedding), reverse=True)

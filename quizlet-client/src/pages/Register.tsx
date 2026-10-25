@@ -52,13 +52,13 @@ const Register = () => {
             >
               <div className="grid grid-cols-2 text-left gap-x-2">
                 <label
-                  className="text-white text-md font-extralight"
+                  className="text-gray-900 text-md font-extralight dark:text-white"
                   htmlFor="firstname"
                 >
                   Firstname:
                 </label>
                 <label
-                  className="text-white text-md font-extralight"
+                  className="text-gray-900 text-md font-extralight dark:text-white"
                   htmlFor="lastname"
                 >
                   Lastname:
@@ -78,12 +78,12 @@ const Register = () => {
                   {...register("lastname")}
                 />
                 {errors.firstname ? (
-                  <p className="text-white">{errors.firstname.message}</p>
+                  <p className="text-sm text-red-600 dark:text-red-400">{errors.firstname.message}</p>
                 ) : (
                   ""
                 )}
                 {errors.lastname ? (
-                  <p className="text-white">{errors.lastname.message}</p>
+                  <p className="text-sm text-red-600 dark:text-red-400">{errors.lastname.message}</p>
                 ) : (
                   ""
                 )}
@@ -103,7 +103,7 @@ const Register = () => {
                   {...register("username")}
                 />
                 {errors.username ? (
-                  <p className="text-white">{errors.username.message}</p>
+                  <p className="text-sm text-red-600 dark:text-red-400">{errors.username.message}</p>
                 ) : (
                   ""
                 )}
@@ -123,7 +123,7 @@ const Register = () => {
                   {...register("password")}
                 />
                 {errors.password ? (
-                  <p className="text-white">{errors.password.message}</p>
+                  <p className="text-sm text-red-600 dark:text-red-400">{errors.password.message}</p>
                 ) : (
                   ""
                 )}
@@ -131,7 +131,7 @@ const Register = () => {
               <div className="flex items-center justify-between">
                 <a
                   href="#"
-                  className="text-sm font-medium text-white text-primary-600 hover:underline dark:text-primary-500"
+                  className="text-sm font-medium text-primary-600 hover:underline dark:text-primary-500"
                 >
                   Forgot password?
                 </a>

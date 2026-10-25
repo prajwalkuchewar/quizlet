@@ -5,8 +5,13 @@ import { UserProfileToken } from "../models/User";
 
 const VITE_LOGIN_URL = `${config.authUrl}/login`;
 const VITE_SIGNUP_URL = `${config.authUrl}/signup`; // Updated to use config.authUrl for consistency
+const VITE_LOGOUT_URL = `${config.authUrl}/logout`;
 // console.log(VITE_LOGIN_URL);
 // console.log(VITE_SIGNUP_URL);
+
+export const logoutAPI = async () => {
+  await axios.post(VITE_LOGOUT_URL);
+};
 
 export const loginAPI = async (username: string, password: string) => {
   try {
