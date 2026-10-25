@@ -6,7 +6,7 @@ services:
     environment:
       POSTGRES_DB: quizlet
       POSTGRES_USER: quizlet
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-quizlet-demo-password}
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
@@ -33,10 +33,14 @@ services:
     restart: "no"
 
   backend:
-    image: ghcr.io/${GHCR_OWNER:?set GHCR_OWNER}/quizlet-backend:${IMAGE_TAG:-latest}
-    env_file: .env
+    image: ${DOCKERHUB_NAMESPACE:-prajwal018}/quizlet-backend:${IMAGE_TAG:-latest}
+    env_file:
+      - path: .env
+        required: false
     environment:
-      DATABASE_URL: postgresql+psycopg://quizlet:${POSTGRES_PASSWORD}@db:5432/quizlet
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY:-demo-only-jwt-secret-change-me-0123456789}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost}
+      DATABASE_URL: postgresql+psycopg://quizlet:${POSTGRES_PASSWORD:-quizlet-demo-password}@db:5432/quizlet
       LLM_BASE_URL: http://ollama:11434
     ports:
       - "8000:8000"
@@ -48,7 +52,7 @@ services:
     restart: unless-stopped
 
   web:
-    image: ghcr.io/${GHCR_OWNER:?set GHCR_OWNER}/quizlet-client:${IMAGE_TAG:-latest}
+    image: ${DOCKERHUB_NAMESPACE:-prajwal018}/quizlet-client:${IMAGE_TAG:-latest}
     ports:
       - "80:80"
     depends_on:

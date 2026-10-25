@@ -78,13 +78,15 @@ Open the URL Vite prints (usually `http://localhost:5173`).
 
 ## Running with Docker Compose
 
-The compose file runs the whole stack on one host.
+The compose file pulls prebuilt images from Docker Hub and runs the whole stack on one host. No setup is needed for a demo:
 
 ```bash
-cp .env.example .env
-# Fill in POSTGRES_PASSWORD, JWT_SECRET_KEY, and GHCR_OWNER
 docker compose up -d
 ```
+
+Then open `http://localhost`. The first start downloads the Ollama models (several GB), so the chat features work once `ollama-models` exits.
+
+For anything beyond a local demo, copy `.env.example` to `.env` and set `POSTGRES_PASSWORD` and `JWT_SECRET_KEY` (32+ characters). The demo defaults are not safe for production.
 
 | Service         | Port     | Notes                                       |
 | --------------- | -------- | ------------------------------------------- |
@@ -134,10 +136,9 @@ On every push and pull request:
 
 On pushes to `main`, after those pass:
 
-4. **publish**: pushes `quizlet-backend` and `quizlet-client` images to GitHub Container Registry, tagged with the commit SHA and `latest`.
-5. **deploy**: copies `docker-compose.yml` to the server over SSH, then pulls the images and restarts the stack.
+4. **publish**: pushes `quizlet-backend` and `quizlet-client` images to Docker Hub, tagged with the commit SHA and `latest`.
 
-The deploy job needs these repository secrets and variables: `VPS_HOST`, `VPS_USER`, `VPS_DEPLOY_DIR`, and `VPS_SSH_KEY` (secrets), plus `VITE_API_BASE` (variable, the public API URL baked into the client build). The `production` environment must exist.
+Repository secrets needed: `DOCKERHUB_USERNAME` and `DOCKERHUB_TOKEN` (a Docker Hub access token). The optional variable `VITE_API_BASE` sets the API URL baked into the client build (default `http://localhost:8000`).
 
 ## Roadmap
 
