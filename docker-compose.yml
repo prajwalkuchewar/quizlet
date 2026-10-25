@@ -1,0 +1,60 @@
+name: quizlet
+
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: quizlet
+      POSTGRES_USER: quizlet
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U quizlet -d quizlet"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    restart: unless-stopped
+
+  ollama:
+    image: ollama/ollama:latest
+    volumes:
+      - ollama:/root/.ollama
+    restart: unless-stopped
+
+  # One-shot job that downloads the configured models into the ollama volume.
+  ollama-models:
+    image: ollama/ollama:latest
+    entrypoint: ["sh", "-c"]
+    command:
+      - "OLLAMA_HOST=http://ollama:11434 ollama pull llama3.2 && OLLAMA_HOST=http://ollama:11434 ollama pull nomic-embed-text"
+    depends_on:
+      - ollama
+    restart: "no"
+
+  backend:
+    image: ghcr.io/${GHCR_OWNER:?set GHCR_OWNER}/quizlet-backend:${IMAGE_TAG:-latest}
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql+psycopg://quizlet:${POSTGRES_PASSWORD}@db:5432/quizlet
+      LLM_BASE_URL: http://ollama:11434
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+      ollama:
+        condition: service_started
+    restart: unless-stopped
+
+  web:
+    image: ghcr.io/${GHCR_OWNER:?set GHCR_OWNER}/quizlet-client:${IMAGE_TAG:-latest}
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  pgdata:
+  ollama:
