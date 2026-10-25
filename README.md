@@ -34,8 +34,29 @@ An AI-assisted study app. Upload your notes, ask questions about them, generate 
 | [quizlet-backend/](quizlet-backend/)                 | FastAPI application, tests, and Dockerfile. See its [README](quizlet-backend/README.md) for API details. |
 | [quizlet-client/](quizlet-client/)                   | React, Vite, and TypeScript single-page app, plus its Dockerfile and nginx config.                       |
 | [docker-compose.yml](docker-compose.yml)             | Runs the full stack: PostgreSQL, Ollama, model download, backend, and web client.                        |
-| [.github/workflows/ci.yml](.github/workflows/ci.yml) | CI: backend tests, Docker builds, client build, image publishing, and deployment.                        |
-| [.env.example](.env.example)                         | Deployment environment template.                                                                         |
+| [.github/workflows/ci.yml](.github/workflows/ci.yml) | CI: backend tests, Docker builds, client build, and Docker Hub publishing.                               |
+| [.env.example](.env.example)                         | Optional overrides for Docker Compose and production settings.                                           |
+
+## Run the demo
+
+The prebuilt images are on Docker Hub, so you only need Docker. You don't need the source code.
+
+Requirements: Docker Desktop (or Docker Engine with Compose), about 8 GB of free disk space, and ports 80 and 8000 free.
+
+```bash
+curl -O https://raw.githubusercontent.com/prajwalkuchewar/quizlet/main/docker-compose.yml
+docker compose up -d
+```
+
+Then open **http://localhost**, register an account, and try uploading a document or generating a quiz.
+
+The first start downloads the images and the Ollama models (several GB). `docker compose ps` shows progress. The `ollama-models` service exits with code 0 when the models are ready, and chat and flashcard features need that.
+
+To stop the demo: `docker compose down`. To also delete stored data: `docker compose down -v`.
+
+Notes:
+- The demo uses default passwords. Do not expose it to the internet. See [.env.example](.env.example) for production settings.
+- Without a GPU, model responses are slow.
 
 ## Getting started
 
