@@ -1,6 +1,6 @@
 # FastAPI backend
 
-This backend consolidates the Spring auth, question, and quiz services into one FastAPI application. It keeps the existing `/auth`, `/questions`, and `/quiz` routes and the camelCase request/response fields used by the Java services.
+This backend is a single FastAPI application with `/auth`, `/questions`, `/quiz`, and `/llm` routes and camelCase JSON fields, matching the React client.
 
 ## Run locally
 
@@ -53,15 +53,15 @@ The initial vector index stores embeddings as JSON and ranks them with cosine si
 
 `POST /auth/signup` accepts `firstname`, `lastname`, `username`, `password`, and optional `role` (`USER` by default). `POST /auth/login` returns a bearer token. Auth routes are public.
 
-- Any logged-in user can take quizzes (`GET /quiz`, `GET /quiz/{id}`, `POST /quiz/submit`, `POST /quiz/{id}/attempts`), read their own attempts, and use materials and flashcards.
-- `/questions` (question bank CRUD, generation, retrieval, and scoring) and `POST /quiz/create` require an `ADMIN` bearer token.
+- Any logged-in user can take quizzes (`GET /quiz`, `GET /quiz/{id}`, `POST /quiz/{id}/attempts`), read their own attempts, and use materials and flashcards.
+- `/questions` (question bank CRUD) and `POST /quiz/create` require an `ADMIN` bearer token.
 
 For safety, do not allow public signup to grant `ADMIN` in a production deployment; create administrators through a controlled bootstrap process.
 
 ## Routes
 
-- Auth: `POST /auth/signup`, `POST /auth/login`, `POST /auth/validate`; `GET /auth/me`
-- Question bank (admin): CRUD on `/questions`, `GET /questions/category/{category}`, `GET /questions/generate?category=...&numQ=...`, `POST /questions/retrieve`, `POST /questions/score`
+- Auth: `POST /auth/signup`, `POST /auth/login`; `GET /auth/me`
+- Question bank (admin): CRUD on `/questions`
 - Materials (user-owned): `POST /questions/materials/text`, `POST /questions/materials/upload`, `GET /questions/materials`, `DELETE /questions/materials/{id}`, `POST /questions/materials/ask`
 - Health: `GET /health` (checks the database and the LLM; returns 503 only when the database is down)
 
@@ -71,6 +71,6 @@ For safety, do not allow public signup to grant `ADMIN` in a production deployme
 - LLM calls run through a concurrency limit (`LLM_MAX_CONCURRENCY`, default 1), a request timeout (`LLM_REQUEST_TIMEOUT_SECONDS`), and a circuit breaker. After repeated LLM failures the breaker opens and calls return 503 until `LLM_CIRCUIT_RESET_SECONDS` passes.
 - If a client disconnects during generation, the backend cancels the Ollama request so the model stops generating.
 - Unhandled errors return a generic JSON 500 without a stack trace; details go to the server log.
-- Quizzes: `GET /quiz`, `GET /quiz/{id}`, `POST /quiz/submit`, `POST /quiz/{id}/attempts` (scores on the server and saves the attempt), `GET /quiz/attempts` (your history, newest first), `POST /quiz/create` (admin)
+- Quizzes: `GET /quiz`, `GET /quiz/{id}`, `POST /quiz/{id}/attempts` (scores on the server and saves the attempt), `GET /quiz/attempts` (your history, newest first), `POST /quiz/create` (admin)
 - Flashcards (user-owned): `POST /quiz/flashcards/generate`, `GET /quiz/flashcards`, `GET /quiz/flashcards/{id}`, `POST /quiz/flashcards/{id}/review`, `GET /quiz/flashcards/{id}/progress`
 - LLM: `GET /llm/status`

@@ -137,11 +137,6 @@ def score_responses(db: Session, responses: list[QuestionResponse]) -> int:
     return sum(questions[r.id].rightAnswer == r.response for r in responses)
 
 
-@router.post("/submit", response_model=int)
-def submit(responses: list[QuestionResponse], db: Session = Depends(get_db), _user: User = Depends(get_current_user)):
-    return score_responses(db, responses)
-
-
 @router.post("/{quiz_id}/attempts", response_model=QuizAttemptOut, status_code=201,
              summary="Score a quiz and save the attempt to your history")
 def submit_attempt(quiz_id: int, responses: list[QuestionResponse], db: Session = Depends(get_db),

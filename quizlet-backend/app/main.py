@@ -44,15 +44,17 @@ app = FastAPI(
     ),
     version="1.1.0",
     openapi_tags=[
-        {"name": "auth", "description": "Signup, login, and bearer token validation."},
-        {"name": "questions", "description": "Admin question bank and quiz scoring."},
+        {"name": "auth", "description": "Signup, login, and the current user."},
+        {"name": "questions", "description": "Admin question bank CRUD."},
         {"name": "question service - materials", "description": "User-owned material ingestion and semantic search."},
-        {"name": "quiz", "description": "Admin quiz bank endpoints preserved from the Java backend."},
+        {"name": "quiz", "description": "Quiz catalog, admin quiz creation, and scored attempts."},
         {"name": "quiz service - flashcards", "description": "Generate, study, and review material-grounded flashcards."},
         {"name": "LLM service", "description": "Health/status endpoint for the in-process Ollama integration."},
     ],
     lifespan=lifespan,
 )
+
+
 class UnhandledErrorMiddleware(BaseHTTPMiddleware):
     # Sits inside CORS so even 500 responses carry CORS headers and never expose a stack trace.
     async def dispatch(self, request: Request, call_next):

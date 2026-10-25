@@ -67,7 +67,6 @@ const CreateQuiz = () => {
             {...register("category")}
           >
             <option value="">Select a category</option>
-            <option value="Java">Java</option>
             <option value="Python">Python</option>
             <option value="History">History</option>
             <option value="Math">Math</option>

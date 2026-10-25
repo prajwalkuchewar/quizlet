@@ -17,10 +17,6 @@ class LoginRequest(BaseModel):
     password: str
 
 
-class ValidationRequest(BaseModel):
-    jwt: str
-
-
 class QuestionInput(BaseModel):
     questionTitle: str
     option1: str

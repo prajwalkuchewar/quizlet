@@ -1,7 +1,7 @@
 // src/models/Quiz.ts
 export interface Quiz {
   id?: number; // Optional ID for the quiz (mainly used for updating)
-  category: string; // Category of the quiz (e.g., Java)
+  category: string; // Category of the quiz (e.g., Python)
   numQ: number; // Number of questions in the quiz
   title: string; // Title of the quiz
 }
