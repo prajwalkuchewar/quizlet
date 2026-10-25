@@ -1,0 +1,37 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Dark theme: remaps the app's blue surfaces and text when <html> has the "dark" class */
+html.dark .min-h-lvh.bg-gradient-to-br,
+html.dark .bg-gradient-to-br {
+  background-image: linear-gradient(to bottom right, #0f172a, #1e293b) !important;
+}
+html.dark .bg-blue-100 { background-color: #1e293b !important; }
+html.dark .bg-blue-200 { background-color: #334155 !important; }
+html.dark .bg-white { background-color: #1e293b !important; }
+html.dark .text-blue-950,
+html.dark .text-blue-850,
+html.dark .text-blue-800 { color: #e2e8f0 !important; }
+html.dark .border-blue-200 { border-color: #475569 !important; }
+html.dark .footerPattern { background-color: #1e293b !important; }
+html.dark footer {
+  color: #e2e8f0 !important;
+}
+html.dark input:not([type="radio"]):not([type="checkbox"]),
+html.dark select,
+html.dark textarea {
+  background-color: #0f172a !important;
+  color: #e2e8f0 !important;
+}
+
+.jigsaw {
+  background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIsAAAB/CAYAAADfGjHwAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAANXSURBVHhe7d3NihxVHMbhU+ZTcSEqJAZEEHRhNgYDcSd4E+ImEPAyssiFeDFu3ehKEF0FF36AHwsxcWZi6Z+qpkHoPm9PicNMPQ8U01Od5qSb3xRT3afODHcfjGODwHPzV3Y4eTZtwzDvWDGx7FCBlHu3x/bGzdaOT6bv10wse1y+1Nprrwzt+tXWjo7nnSsmlo4nf843EAs5sRATCzGxEBMLMbEQEwsxsRATCzGxEBMLMbEQEwsxsXQ8f22+gVh2qbksNQHqy29a+/GX1q5eme9YMbF0fPtda7/93tqVy/OOFRNLxwvXp6OMae1i4QBiISYWYmIhJhZiYiEmFmJiISYWYmIhJpYOS25siaWjPkCszWdDYtlpczT58L3Wbr3a2h9P5ztWTCx7XPrn1anJT7U+C2Lpsj7LlliIiYWYWIiJhZhYiImFmFiIiYWYWIiJhZhYiImFmFiIiYWYWHbYrM/y+VetPf7B+ixFLB0//dra0yPrsxSxdFifZUssxMRCTCzExEJseOfjcazTwkMvpKpraurf/xfX0xj/fIw/fPRwHGud11q+s37rT9V7EDVAXYC19Lqa8zz+m7fmHQvU+zh1en7o+PW86w+UL5WOPzz6dBxrYeBa77VOE1Ob/+wHd6YLsZZcX/P147Mbvx772RfT+ynndfwlDhl/eP+TcTy06n9b8thy1uPXC785rJ/GWY5fj6srJ0/r2V/5uMO798dxyZOtJ7qU8ecbp/B/jj/cfXDanyfWxqlzR/3k1laH+7UTS8dLL06/SB6fzDtWTCw7bI4m925Pp6dHx/MdKyaWPZacZVxEXg5iYiEmFmJiISYWYmIhJhZiYiEmFmJiISYWYmIhJhZiYumoCc1MxLJHTWauWfs1oRxzcLs20ym9So4sXTWdsjZzcMXSVZdJ1ObIIhYOIBZiYiEmFmJiISYWYmIhJhZiYiEmFmJi6ajVIK3PMhFLx1uvT2u0WJ9FLDvV0aQ+QLzzdms3XrY+SxFLx5IlWy8asRATCzGxEBMLMbEQEwsxsRATCzGxEBMLMbEQEwsxsRATS4f1WbbEskfNafn+59H6LDPrs3RUMOXQP9J9ETmydFhyY0ssxMRCTCzExEJMLMTEQkwsxMRCTCzExEKotb8BdybrKrCmfYYAAAAASUVORK5CYII=);
+  background-size: 100px 100px;
+}
+
+.footerPattern {
+  background-color: #bfdbfe;
+  background-image: url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%231e40af' fill-opacity='0.3' fill-rule='evenodd'%3E%3Ccircle cx='3' cy='3' r='3'/%3E%3Ccircle cx='13' cy='13' r='3'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 100px 100px;
+}

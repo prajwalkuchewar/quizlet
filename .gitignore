@@ -1,0 +1,25 @@
+# Secrets and local environment
+.env
+.env.*
+!.env.example
+
+# Python
+quizlet-backend/.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+
+# Local databases and uploads
+*.db
+
+# Node / Vite
+quizlet-client/node_modules/
+quizlet-client/dist/
+*.log
+npm-debug.log*
+
+# Editors and OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
