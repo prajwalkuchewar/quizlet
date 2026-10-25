@@ -1,0 +1,13 @@
+Photosynthesis Basics
+
+Photosynthesis is the process plants, algae, and some bacteria use to convert light energy into chemical energy. The energy is stored as glucose.
+
+The overall equation is: 6 CO2 + 6 H2O + light energy -> C6H12O6 + 6 O2.
+
+Photosynthesis happens mainly in the chloroplasts, which contain the green pigment chlorophyll. Chlorophyll absorbs mostly blue and red light and reflects green light, which is why leaves look green.
+
+The process has two stages:
+1. Light-dependent reactions occur in the thylakoid membranes. Water is split, oxygen is released, and ATP and NADPH are produced.
+2. The Calvin cycle occurs in the stroma. It uses ATP and NADPH to fix carbon dioxide into sugar.
+
+Factors that limit the rate of photosynthesis include light intensity, carbon dioxide concentration, and temperature.

@@ -7,26 +7,32 @@ import httpx
 from fastapi import HTTPException
 
 from app.config import settings
+from app.services.llm_guard import breaker, ensure_available
 
 
 def _post(path: str, payload: dict) -> dict:
+    ensure_available()
     try:
-        response = httpx.post(f"{settings.llm_base_url.rstrip('/')}{path}", json=payload, timeout=180)
+        response = httpx.post(f"{settings.llm_base_url.rstrip('/')}{path}", json=payload,
+                              timeout=settings.llm_request_timeout_seconds)
         response.raise_for_status()
-        return response.json()
+        data = response.json()
     except (httpx.HTTPError, ValueError) as exc:
-        raise HTTPException(status_code=503, detail=f"LLM service unavailable: {exc}") from exc
+        breaker.record_failure()
+        raise HTTPException(status_code=503, detail=f"LLM service unavailable: {type(exc).__name__}") from exc
+    breaker.record_success()
+    return data
 
 
 def status() -> dict:
+    details = {"baseUrl": settings.llm_base_url, "chatModel": settings.llm_chat_model,
+               "embeddingModel": settings.llm_embedding_model, "circuitOpen": breaker.is_open}
     try:
         response = httpx.get(f"{settings.llm_base_url.rstrip('/')}/api/tags", timeout=5)
         response.raise_for_status()
-        return {"available": True, "baseUrl": settings.llm_base_url,
-                "chatModel": settings.llm_chat_model, "embeddingModel": settings.llm_embedding_model}
+        return {"available": True, **details}
     except httpx.HTTPError:
-        return {"available": False, "baseUrl": settings.llm_base_url,
-                "chatModel": settings.llm_chat_model, "embeddingModel": settings.llm_embedding_model}
+        return {"available": False, **details}
 
 
 def embed_texts(texts: list[str]) -> list[list[float]]:
@@ -74,12 +80,37 @@ def _parse_flashcards(raw: str, count: int) -> list[dict[str, str]]:
         raise HTTPException(status_code=502, detail="LLM returned invalid flashcard JSON") from exc
 
 
+async def answer_from_material_async(question: str, context: str) -> str:
+    messages = [
+        {"role": "system", "content": (
+            "You are a friendly study assistant. Answer the learner's question in a conversational, "
+            "natural tone, using only the supplied study excerpts. Mention the source document titles "
+            "naturally when helpful. If the excerpts don't contain the answer, say so plainly and do not guess."
+        )},
+        {"role": "user", "content": f"Question: {question}\n\nStudy excerpts:\n{context[:24000]}"},
+    ]
+    try:
+        async with httpx.AsyncClient(timeout=settings.llm_request_timeout_seconds) as client:
+            response = await client.post(f"{settings.llm_base_url.rstrip('/')}/api/chat", json={
+                "model": settings.llm_chat_model, "stream": False, "messages": messages,
+                "options": {"num_predict": 400},
+            })
+            response.raise_for_status()
+            content = response.json().get("message", {}).get("content", "").strip()
+    except (httpx.HTTPError, ValueError) as exc:
+        detail = f"{type(exc).__name__}: {exc}" if str(exc) else type(exc).__name__
+        raise HTTPException(status_code=503, detail=f"LLM service unavailable: {detail}") from exc
+    if not content:
+        raise HTTPException(status_code=502, detail="LLM returned an empty answer")
+    return content
+
+
 async def generate_flashcards_async(prompt: str, context: str, count: int, difficulty: str) -> list[dict[str, str]]:
     # Streamed on an async client: cancelling this task closes the connection, and Ollama stops generating.
     messages = _flashcard_messages(prompt, context, count, difficulty)
     parts: list[str] = []
     try:
-        async with httpx.AsyncClient(timeout=180) as client:
+        async with httpx.AsyncClient(timeout=settings.llm_request_timeout_seconds) as client:
             async with client.stream("POST", f"{settings.llm_base_url.rstrip('/')}/api/chat", json={
                 "model": settings.llm_chat_model, "stream": True, "format": "json", "messages": messages,
             }) as response:

@@ -1,0 +1,16 @@
+Python Basics
+
+Python is a high-level, interpreted programming language known for readable syntax. It supports multiple paradigms, including procedural, object-oriented, and functional programming.
+
+Variables are created by assignment and do not need a type declaration. For example: count = 10, name = "Ada".
+
+Common data types include int, float, str, bool, list, tuple, dict, and set. Lists are mutable and ordered. Tuples are immutable. Dictionaries map keys to values.
+
+Functions are defined with the def keyword:
+
+def greet(name):
+    return f"Hello, {name}!"
+
+Indentation defines code blocks, so consistent indentation is required.
+
+Exceptions are handled with try, except, else, and finally. Packages are installed with pip, and virtual environments isolate project dependencies.

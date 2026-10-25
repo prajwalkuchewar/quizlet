@@ -1,15 +1,17 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
+from app.config import settings
 from app.database import get_db
 from app.models import User
 from app.schemas import LoginRequest, SignupRequest, ValidationRequest
 from app.security import create_token, get_current_user, hash_password, verify_password
+from app.services.rate_limit import limit_by_ip
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
 
-@router.post("/signup")
+@router.post("/signup", dependencies=[Depends(limit_by_ip("signup", settings.rate_limit_signup_per_minute))])
 def signup(body: SignupRequest, db: Session = Depends(get_db)):
     if db.query(User).filter(User.username == body.username).first():
         raise HTTPException(status_code=409, detail="User exists already")
@@ -20,7 +22,7 @@ def signup(body: SignupRequest, db: Session = Depends(get_db)):
     return {"message": "User registration successful"}
 
 
-@router.post("/login")
+@router.post("/login", dependencies=[Depends(limit_by_ip("login", settings.rate_limit_login_per_minute))])
 def login(body: LoginRequest, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.username == body.username).first()
     if not user or not verify_password(body.password, user.password):

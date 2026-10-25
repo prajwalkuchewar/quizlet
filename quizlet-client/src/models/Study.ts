@@ -14,6 +14,11 @@ export interface MaterialSearchResult {
   similarity: number;
 }
 
+export interface MaterialAskResult {
+  answer: string;
+  sources: MaterialSearchResult[];
+}
+
 export interface LlmStatus {
   available: boolean;
   baseUrl: string;

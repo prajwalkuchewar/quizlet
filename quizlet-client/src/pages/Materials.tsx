@@ -2,20 +2,16 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Footer from "../components/Footer";
 import Header from "../components/Header";
+import MaterialChat from "../components/MaterialChat";
 import {
   addTextMaterial,
   deleteMaterial,
   getLlmStatus,
   listMaterials,
-  searchMaterials,
   uploadMaterial,
 } from "../api/materialService";
 import { handleError } from "../helper/ErrorHandler";
-import {
-  LlmStatus,
-  Material,
-  MaterialSearchResult,
-} from "../models/Study";
+import { LlmStatus, Material } from "../models/Study";
 
 const buttonClass =
   "px-6 py-3 text-xl font-extrabold transition duration-300 ease-in-out transform bg-blue-200 shadow-lg cursor-pointer w-fit text-blue-950 hover:bg-yellow-600 hover:translate-y-1 hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed";
@@ -32,9 +28,6 @@ const Materials = () => {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [file, setFile] = useState<File | null>(null);
-
-  const [query, setQuery] = useState("");
-  const [results, setResults] = useState<MaterialSearchResult[] | null>(null);
 
   const refresh = async () => {
     try {
@@ -91,19 +84,6 @@ const Materials = () => {
       setMaterials((prev) => prev.filter((m) => m.id !== id));
     } catch (err) {
       handleError(err);
-    }
-  };
-
-  const onSearch = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!query.trim()) return;
-    setBusy(true);
-    try {
-      setResults(await searchMaterials(query.trim()));
-    } catch (err) {
-      handleError(err);
-    } finally {
-      setBusy(false);
     }
   };
 
@@ -213,37 +193,13 @@ const Materials = () => {
               </ul>
             )}
 
-            <h2 className="pt-4 text-2xl font-bold text-blue-850">Search</h2>
-            <form onSubmit={onSearch} className="flex gap-2">
-              <input
-                className={inputClass}
-                placeholder="Ask about your materials"
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-              />
-              <button
-                type="submit"
-                disabled={busy || !query.trim()}
-                className="px-4 font-bold bg-blue-800 text-blue-200 hover:bg-yellow-500 hover:text-blue-800 disabled:opacity-50"
-              >
-                Search
-              </button>
-            </form>
-            {results && (
-              <ul className="space-y-2">
-                {results.length === 0 && <p>No matches.</p>}
-                {results.map((r) => (
-                  <li key={r.chunkId} className="p-3 bg-white border-2 border-blue-200">
-                    <div className="text-sm font-bold text-blue-800">
-                      {r.title} · {(r.similarity * 100).toFixed(0)}%
-                    </div>
-                    <p className="text-blue-950">{r.content}</p>
-                  </li>
-                ))}
-              </ul>
-            )}
           </section>
         </div>
+
+        <MaterialChat
+          hasMaterials={loading ? null : materials.length > 0}
+          aiAvailable={status ? status.available : null}
+        />
       </main>
       <Footer />
     </div>

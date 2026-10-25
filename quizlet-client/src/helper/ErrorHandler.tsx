@@ -24,6 +24,13 @@ const messageFromBody = (data: unknown): string | undefined => {
   return undefined;
 };
 
+export const getErrorMessage = (error: unknown): string => {
+  if (!axios.isAxiosError(error)) return "Something went wrong. Please try again.";
+  const err = error.response;
+  if (!err) return "Cannot reach the server. Is the backend running?";
+  return messageFromBody(err.data) ?? `Request failed (${err.status})`;
+};
+
 export const handleError = (error: unknown) => {
   if (axios.isAxiosError(error)) {
     const err = error.response;

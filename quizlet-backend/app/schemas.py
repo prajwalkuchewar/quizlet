@@ -90,6 +90,11 @@ class MaterialSearchHit(BaseModel):
     similarity: float
 
 
+class MaterialAskOutput(BaseModel):
+    answer: str
+    sources: list[MaterialSearchHit]
+
+
 class GenerateFlashcardsInput(BaseModel):
     prompt: str = Field(min_length=1, max_length=2000)
     materialIds: list[int] = Field(min_length=1)

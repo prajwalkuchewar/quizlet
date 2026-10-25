@@ -3,7 +3,7 @@ import config from "../config/config";
 import {
   LlmStatus,
   Material,
-  MaterialSearchResult,
+  MaterialAskResult,
 } from "../models/Study";
 
 export const listMaterials = async () => {
@@ -34,13 +34,9 @@ export const deleteMaterial = async (id: number) => {
   await axios.delete(`${config.materialsUrl}/${id}`);
 };
 
-export const searchMaterials = async (
-  query: string,
-  materialIds: number[] = [],
-  limit = 5,
-) => {
-  const { data } = await axios.post<MaterialSearchResult[]>(
-    `${config.materialsUrl}/search`,
+export const askMaterials = async (query: string, materialIds: number[] = [], limit = 5) => {
+  const { data } = await axios.post<MaterialAskResult>(
+    `${config.materialsUrl}/ask`,
     { query, materialIds, limit },
   );
   return data;

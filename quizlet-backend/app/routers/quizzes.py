@@ -1,16 +1,17 @@
-import asyncio
-
 from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.concurrency import run_in_threadpool
 from sqlalchemy.orm import Session
 
+from app.config import settings
 from app.database import get_db
 from app.models import FlashcardReview, FlashcardSet, Question, Quiz, QuizAttempt, User
 from app.schemas import (FlashcardReviewInput, FlashcardSetOut, FlashcardSetSummary, GenerateFlashcardsInput,
                          QuestionPublic, QuestionResponse, QuizAttemptOut, QuizCreate, QuizOut)
 from app.security import get_current_user, require_admin
+from app.services.llm_guard import run_llm_call
 from app.services.llm_service import generate_flashcards_async
 from app.services.quiz_service import prepare_flashcard_context, save_flashcard_set
+from app.services.rate_limit import limit_by_user
 
 router = APIRouter(prefix="/quiz", tags=["quiz"])
 
@@ -28,27 +29,15 @@ def to_flashcard_set_out(card_set: FlashcardSet) -> FlashcardSetOut:
 
 
 @router.post("/flashcards/generate", response_model=FlashcardSetOut, status_code=201,
+             dependencies=[Depends(limit_by_user("flashcards", settings.rate_limit_llm_per_minute))],
              tags=["quiz service - flashcards"], summary="Generate a saved flashcard set from your materials")
 async def generate_flashcard_set(request: Request, body: GenerateFlashcardsInput, db: Session = Depends(get_db),
                                  user: User = Depends(get_current_user)):
     materials, matches, context = await run_in_threadpool(
         prepare_flashcard_context, db, user, body.prompt, body.materialIds, body.count)
-    cards = await _until_client_disconnects(
-        request, generate_flashcards_async(body.prompt, context, body.count, body.difficulty))
+    cards = await run_llm_call(
+        request, lambda: generate_flashcards_async(body.prompt, context, body.count, body.difficulty))
     return await run_in_threadpool(_save_and_export, db, user, body, materials, matches, cards)
-
-
-async def _until_client_disconnects(request: Request, work):
-    # FastAPI does not cancel a handler when the browser goes away, so watch for that and cancel the LLM call.
-    task = asyncio.ensure_future(work)
-    while True:
-        done, _ = await asyncio.wait({task}, timeout=0.5)
-        if done:
-            return task.result()
-        if await request.is_disconnected():
-            task.cancel()
-            await asyncio.gather(task, return_exceptions=True)
-            raise HTTPException(status_code=499, detail="Client disconnected; flashcard generation stopped")
 
 
 def _save_and_export(db: Session, user: User, body: GenerateFlashcardsInput, materials, matches, cards):
