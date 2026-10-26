@@ -17,14 +17,14 @@ services:
     restart: unless-stopped
 
   ollama:
-    image: ollama/ollama:latest
+    image: alpine/ollama:latest
     volumes:
       - ollama:/root/.ollama
     restart: unless-stopped
 
   # One-shot job that downloads the configured models into the ollama volume.
   ollama-models:
-    image: ollama/ollama:latest
+    image: alpine/ollama:latest
     entrypoint: ["sh", "-c"]
     command:
       - "OLLAMA_HOST=http://ollama:11434 ollama pull llama3.2 && OLLAMA_HOST=http://ollama:11434 ollama pull nomic-embed-text"
