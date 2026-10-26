@@ -25,6 +25,9 @@ type Props = { children: React.ReactNode };
 
 const UserContext = createContext<UserContextType>({} as UserContextType);
 
+// A 401 from these endpoints means bad credentials or an expired session, not a stale token.
+const AUTH_ENDPOINT_SUFFIXES = ["/login", "/signup", "/logout"];
+
 const setAuthHeader = (token: string | null) => {
   if (token) {
     axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
@@ -49,6 +52,32 @@ export const UserProvider = ({ children }: Props) => {
     }
     setIsReady(true);
   }, []);
+
+  useEffect(() => {
+    const interceptor = axios.interceptors.response.use(
+      (response) => response,
+      (error) => {
+        const url: string = error?.config?.url ?? "";
+        const isAuthCall = AUTH_ENDPOINT_SUFFIXES.some((suffix) => url.endsWith(suffix));
+        if (
+          axios.isAxiosError(error) &&
+          error.response?.status === 401 &&
+          !isAuthCall &&
+          localStorage.getItem("token")
+        ) {
+          localStorage.removeItem("token");
+          localStorage.removeItem("user");
+          setAuthHeader(null);
+          setUser(null);
+          setToken(null);
+          toast.warning("Your session has expired. Please log in again.");
+          navigate("/login");
+        }
+        return Promise.reject(error);
+      },
+    );
+    return () => axios.interceptors.response.eject(interceptor);
+  }, [navigate]);
 
   const registerUser = async (
     firstname: string,
