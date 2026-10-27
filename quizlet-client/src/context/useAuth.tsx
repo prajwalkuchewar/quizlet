@@ -36,6 +36,40 @@ const setAuthHeader = (token: string | null) => {
   }
 };
 
+const isUserProfile = (value: unknown): value is UserProfile =>
+  typeof value === "object" &&
+  value !== null &&
+  "firstname" in value &&
+  typeof value.firstname === "string" &&
+  "lastname" in value &&
+  typeof value.lastname === "string" &&
+  "username" in value &&
+  typeof value.username === "string" &&
+  "role" in value &&
+  typeof value.role === "string";
+
+const getStoredSession = () => {
+  const token = localStorage.getItem("token");
+  const userdata = localStorage.getItem("user");
+  if (!token && !userdata) {
+    return null;
+  }
+
+  try {
+    const storedUser: unknown = userdata ? JSON.parse(userdata) : null;
+    if (token && isUserProfile(storedUser)) {
+      return { token, user: storedUser };
+    }
+  } catch {
+    // Invalid persisted data is cleared below so it cannot block app startup.
+  }
+
+  localStorage.removeItem("token");
+  localStorage.removeItem("user");
+  toast.warning("Your saved session is invalid. Please log in again.");
+  return null;
+};
+
 export const UserProvider = ({ children }: Props) => {
   const navigate = useNavigate();
   const [token, setToken] = useState<string | null>(null);
@@ -43,14 +77,38 @@ export const UserProvider = ({ children }: Props) => {
   const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
-    const userdata = localStorage.getItem("user");
-    const tokendata = localStorage.getItem("token");
-    if (userdata && tokendata) {
-      setUser(JSON.parse(userdata));
-      setToken(tokendata);
-      setAuthHeader(tokendata);
+    const session = getStoredSession();
+    if (session) {
+      setUser(session.user);
+      setToken(session.token);
+      setAuthHeader(session.token);
     }
     setIsReady(true);
+  }, []);
+
+  useEffect(() => {
+    const syncSession = (event: StorageEvent) => {
+      if (
+        event.storageArea !== localStorage ||
+        (event.key !== null && event.key !== "token" && event.key !== "user")
+      ) {
+        return;
+      }
+
+      const session = getStoredSession();
+      if (session) {
+        setUser(session.user);
+        setToken(session.token);
+        setAuthHeader(session.token);
+      } else {
+        setAuthHeader(null);
+        setUser(null);
+        setToken(null);
+      }
+    };
+
+    window.addEventListener("storage", syncSession);
+    return () => window.removeEventListener("storage", syncSession);
   }, []);
 
   useEffect(() => {
