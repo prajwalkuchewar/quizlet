@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import Footer from "../components/Footer";
 import Header from "../components/Header";
+import { Loader } from "../components/Loader";
 import {
   getFlashcardProgress,
   getFlashcardSet,
@@ -72,7 +73,7 @@ const FlashcardStudy = () => {
     return (
       <div className="min-h-lvh text-center bg-gradient-to-br from-blue-500 to-cyan-400">
         <Header />
-        <p className="p-10">Loading...</p>
+        <Loader label="Loading flashcards..." className="p-10" />
       </div>
     );
   }

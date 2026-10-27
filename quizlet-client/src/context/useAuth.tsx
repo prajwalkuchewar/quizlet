@@ -3,6 +3,7 @@ import React, { createContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { loginAPI, logoutAPI, registerAPI } from "../api/authService";
+import { PageLoader } from "../components/Loader";
 import { UserProfile } from "../models/User";
 
 type UserContextType = {
@@ -14,8 +15,8 @@ type UserContextType = {
     username: string,
     password: string,
     role: string,
-  ) => void;
-  loginUser: (username: string, password: string) => void;
+  ) => Promise<void>;
+  loginUser: (username: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   isLoggedIn: () => boolean;
   isAdmin: () => boolean;
@@ -210,7 +211,7 @@ export const UserProvider = ({ children }: Props) => {
         registerUser,
       }}
     >
-      {isReady ? children : null}
+      {isReady ? children : <PageLoader label="Restoring your session..." />}
     </UserContext.Provider>
   );
 };

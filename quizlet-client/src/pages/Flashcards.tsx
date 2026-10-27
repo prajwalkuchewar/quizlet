@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Footer from "../components/Footer";
 import Header from "../components/Header";
+import { ButtonLabel, Loader } from "../components/Loader";
 import { generateFlashcards, listFlashcardSets } from "../api/flashcardService";
 import { listMaterials } from "../api/materialService";
 import { handleError } from "../helper/ErrorHandler";
@@ -27,14 +28,18 @@ const Flashcards = () => {
   );
   const [busy, setBusy] = useState(false);
   const [recent, setRecent] = useState<FlashcardSetSummary[]>([]);
+  const [loadingMaterials, setLoadingMaterials] = useState(true);
+  const [loadingRecent, setLoadingRecent] = useState(true);
 
   useEffect(() => {
     listMaterials()
       .then(setMaterials)
-      .catch(handleError);
+      .catch(handleError)
+      .finally(() => setLoadingMaterials(false));
     listFlashcardSets()
       .then((sets) => setRecent(sets.slice(0, 10)))
-      .catch(handleError);
+      .catch(handleError)
+      .finally(() => setLoadingRecent(false));
   }, []);
 
   const toggle = (id: number) =>
@@ -77,7 +82,9 @@ const Flashcards = () => {
           >
             <h2 className="text-2xl font-bold text-blue-850">Generate a set</h2>
 
-            {materials.length === 0 ? (
+            {loadingMaterials ? (
+              <Loader label="Loading materials..." />
+            ) : materials.length === 0 ? (
               <p>
                 No materials yet.{" "}
                 <span
@@ -147,7 +154,9 @@ const Flashcards = () => {
               disabled={busy || selected.length === 0 || count < 1 || count > 40}
               className={buttonClass}
             >
-              {busy ? "Generating..." : "Generate"}
+              <ButtonLabel loading={busy} loadingText="Generating...">
+                Generate
+              </ButtonLabel>
             </button>
             {busy && (
               <p className="text-sm text-blue-800">
@@ -158,7 +167,9 @@ const Flashcards = () => {
 
           <section className="p-6 space-y-3 text-left bg-blue-100 border-4 border-blue-200">
             <h2 className="text-2xl font-bold text-blue-850">Recent sets</h2>
-            {recent.length === 0 ? (
+            {loadingRecent ? (
+              <Loader label="Loading sets..." />
+            ) : recent.length === 0 ? (
               <p>No sets yet. Generate one to start studying.</p>
             ) : (
               recent.map((r) => (

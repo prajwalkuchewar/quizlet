@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import Footer from "../components/Footer";
 import Header from "../components/Header";
+import { Loader } from "../components/Loader";
 import { listFlashcardSets } from "../api/flashcardService";
 import { listQuizAttempts } from "../api/quizService";
 import { handleError } from "../helper/ErrorHandler";
@@ -54,7 +55,7 @@ const History = () => {
           History
         </h1>
         {!loaded ? (
-          <p className="text-blue-950">Loading...</p>
+          <Loader label="Loading history..." />
         ) : items.length === 0 ? (
           <p className="text-blue-950">
             Nothing yet. Generate flashcards or solve a quiz to see it here.

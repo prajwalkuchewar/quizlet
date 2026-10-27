@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Footer from "../components/Footer";
 import Header from "../components/Header";
+import { ButtonLabel, Loader } from "../components/Loader";
 import MaterialChat from "../components/MaterialChat";
 import {
   addTextMaterial,
@@ -24,6 +25,7 @@ const Materials = () => {
   const [status, setStatus] = useState<LlmStatus | null>(null);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
+  const [busyKind, setBusyKind] = useState<"text" | "upload" | null>(null);
 
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
@@ -50,6 +52,7 @@ const Materials = () => {
     e.preventDefault();
     if (!title.trim() || !content.trim()) return;
     setBusy(true);
+    setBusyKind("text");
     try {
       await addTextMaterial(title.trim(), content);
       setTitle("");
@@ -66,6 +69,7 @@ const Materials = () => {
     e.preventDefault();
     if (!file) return;
     setBusy(true);
+    setBusyKind("upload");
     try {
       await uploadMaterial(file, title.trim() || undefined);
       setFile(null);
@@ -139,7 +143,9 @@ const Materials = () => {
                 disabled={busy || !title.trim() || !content.trim()}
                 className={buttonClass}
               >
-                Save text
+                <ButtonLabel loading={busy && busyKind === "text"} loadingText="Saving...">
+                  Save text
+                </ButtonLabel>
               </button>
             </form>
 
@@ -158,7 +164,9 @@ const Materials = () => {
                 disabled={busy || !file}
                 className={buttonClass}
               >
-                Upload
+                <ButtonLabel loading={busy && busyKind === "upload"} loadingText="Uploading...">
+                  Upload
+                </ButtonLabel>
               </button>
             </form>
           </section>
@@ -166,7 +174,7 @@ const Materials = () => {
           <section className="p-6 space-y-4 text-left bg-blue-100 border-4 border-blue-200">
             <h2 className="text-2xl font-bold text-blue-850">Your materials</h2>
             {loading ? (
-              <p>Loading...</p>
+              <Loader label="Loading materials..." />
             ) : materials.length === 0 ? (
               <p>No materials yet.</p>
             ) : (

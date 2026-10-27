@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { Loader } from "./Loader";
 import { listQuiz } from "../api/quizService";
 import { QuizCreated } from "../models/Quiz";
 
@@ -28,7 +29,7 @@ const ListQuiz = () => {
   }, []);
 
   // Conditional rendering based on state
-  if (loading) return <p>Loading...</p>;
+  if (loading) return <Loader label="Loading quizzes..." />;
 
   if (error) return <p>{error}</p>;
 

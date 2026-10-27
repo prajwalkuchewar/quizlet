@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Footer from "../components/Footer";
 import Header from "../components/Header";
+import { Loader } from "../components/Loader";
 import { listFlashcardSets } from "../api/flashcardService";
 import { listQuizAttempts } from "../api/quizService";
 import { handleError } from "../helper/ErrorHandler";
@@ -55,7 +56,7 @@ const Achievements = () => {
         <h1 className="mb-8 text-4xl font-extrabold text-blue-200 uppercase">
           Achievements
         </h1>
-        {!loaded && <p className="mb-6 text-blue-950">Loading...</p>}
+        {!loaded && <Loader label="Loading achievements..." />}
 
         <div className="grid grid-cols-2 gap-6 md:grid-cols-4">
           {stats.map((s) => (

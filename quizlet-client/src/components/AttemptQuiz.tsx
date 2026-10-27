@@ -5,6 +5,7 @@ import * as Yup from "yup";
 import { fetchQuizQuestions, submitQuizAttempt } from "../api/quizService"; // assuming this service will fetch questions based on quiz ID
 import { QuizQuestions, QuizResponse } from "../models/Quiz";
 import { handleError } from "../helper/ErrorHandler";
+import { PageLoader } from "./Loader";
 
 type Props = {
   quizId: number;
@@ -78,7 +79,7 @@ const AttemptQuiz = ({ quizId, quizTitle }: Props) => {
   };
 
   if (loading) {
-    return <p>Loading...</p>;
+    return <PageLoader label="Loading quiz..." />;
   }
 
   if (error) {

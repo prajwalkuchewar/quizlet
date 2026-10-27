@@ -1,25 +1,27 @@
-import React from "react";
+import React, { lazy } from "react";
 import { Route, Routes as Router, useLocation } from "react-router-dom";
-import AttemptQuiz from "../components/AttemptQuiz";
-import CreateQuiz from "../components/CreateQuiz";
 import Layout from "../components/Layout";
-import Missing from "../components/Missing";
-import Home from "../pages/Home";
-import Login from "../pages/Login";
-import Materials from "../pages/Materials";
-import Flashcards from "../pages/Flashcards";
-import FlashcardStudy from "../pages/FlashcardStudy";
-import Achievements from "../pages/Achievements";
-import History from "../pages/History";
-import Settings from "../pages/Settings";
-import Darkmode from "../pages/Darkmode";
-import QuestionDashboard from "../pages/QuestionDashboard";
-import QuizDashboard from "../pages/QuizDashboard";
-import Register from "../pages/Register";
-import Unauthorized from "../pages/Unauthorized";
 import ProtectedRoute from "./ProtectedRoute";
-import AddQuestion from "../components/AddQuestion";
 import { ToastContainer } from "react-toastify";
+
+// Routes are code-split; Layout shows a loading page while a chunk is fetched.
+const AttemptQuiz = lazy(() => import("../components/AttemptQuiz"));
+const CreateQuiz = lazy(() => import("../components/CreateQuiz"));
+const Missing = lazy(() => import("../components/Missing"));
+const AddQuestion = lazy(() => import("../components/AddQuestion"));
+const Home = lazy(() => import("../pages/Home"));
+const Login = lazy(() => import("../pages/Login"));
+const Materials = lazy(() => import("../pages/Materials"));
+const Flashcards = lazy(() => import("../pages/Flashcards"));
+const FlashcardStudy = lazy(() => import("../pages/FlashcardStudy"));
+const Achievements = lazy(() => import("../pages/Achievements"));
+const History = lazy(() => import("../pages/History"));
+const Settings = lazy(() => import("../pages/Settings"));
+const Darkmode = lazy(() => import("../pages/Darkmode"));
+const QuestionDashboard = lazy(() => import("../pages/QuestionDashboard"));
+const QuizDashboard = lazy(() => import("../pages/QuizDashboard"));
+const Register = lazy(() => import("../pages/Register"));
+const Unauthorized = lazy(() => import("../pages/Unauthorized"));
 
 // const ROLES = {
 //   User: "USER",

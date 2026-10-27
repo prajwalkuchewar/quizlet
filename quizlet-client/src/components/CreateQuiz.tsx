@@ -4,6 +4,7 @@ import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import * as Yup from "yup";
 import { createQuiz } from "../api/quizService";
+import { ButtonLabel } from "./Loader";
 
 type CreateQuizInputs = {
   category: string;
@@ -26,7 +27,7 @@ const CreateQuiz = () => {
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    formState: { errors, isSubmitting },
   } = useForm<CreateQuizInputs>({ resolver: yupResolver(validation) });
 
   const handleCreate = async (form: CreateQuizInputs) => {
@@ -95,9 +96,12 @@ const CreateQuiz = () => {
           )}
           <button
             type="submit"
-            className="px-6 py-3 text-white bg-blue-500 rounded hover:bg-blue-600"
+            disabled={isSubmitting}
+            className="px-6 py-3 text-white bg-blue-500 rounded hover:bg-blue-600 disabled:opacity-60 disabled:cursor-not-allowed"
           >
-            Create Quiz
+            <ButtonLabel loading={isSubmitting} loadingText="Creating quiz...">
+              Create Quiz
+            </ButtonLabel>
           </button>
         </form>
       </div>

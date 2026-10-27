@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import Header from "../components/Header";
+import { Loader } from "../components/Loader";
 import { useNavigate } from "react-router-dom";
 import Footer from "../components/Footer";
 import {
@@ -64,7 +65,7 @@ const QuestionDashboard = () => {
         </div>
 
         {loading ? (
-          <p>Loading...</p>
+          <Loader label="Loading questions..." />
         ) : shown.length === 0 ? (
           <p>No questions found.</p>
         ) : (

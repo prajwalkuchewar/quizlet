@@ -1,10 +1,13 @@
-import React from "react";
+import React, { Suspense } from "react";
 import { Outlet } from "react-router-dom";
+import { PageLoader } from "./Loader";
 
 const Layout = () => {
   return (
     <main className="App">
-      <Outlet />
+      <Suspense fallback={<PageLoader />}>
+        <Outlet />
+      </Suspense>
     </main>
   );
 };

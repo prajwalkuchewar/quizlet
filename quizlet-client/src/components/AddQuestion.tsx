@@ -8,6 +8,7 @@ import {
   QuestionItem,
   updateQuestion,
 } from "../api/questionService";
+import { ButtonLabel } from "./Loader";
 
 type AddQuestionInputs = {
   questionTitle: string;
@@ -38,7 +39,7 @@ const AddQuestion = () => {
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    formState: { errors, isSubmitting },
   } = useForm<AddQuestionInputs>({
     resolver: yupResolver(validation),
     defaultValues: editing
@@ -193,9 +194,12 @@ const AddQuestion = () => {
 
           <button
             type="submit"
-            className="px-6 py-3 text-white bg-blue-500 rounded hover:bg-blue-600"
+            disabled={isSubmitting}
+            className="px-6 py-3 text-white bg-blue-500 rounded hover:bg-blue-600 disabled:opacity-60 disabled:cursor-not-allowed"
           >
-            {editing ? "Save Changes" : "Create Question"}
+            <ButtonLabel loading={isSubmitting} loadingText="Saving...">
+              {editing ? "Save Changes" : "Create Question"}
+            </ButtonLabel>
           </button>
         </form>
       </div>
