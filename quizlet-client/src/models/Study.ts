@@ -14,9 +14,18 @@ export interface MaterialSearchResult {
   similarity: number;
 }
 
+export interface QuizQuestion {
+  type: "multiple_choice" | "true_false" | "short_answer";
+  question: string;
+  options: string[];
+  answer: string;
+  explanation: string;
+}
+
 export interface MaterialAskResult {
   answer: string;
   sources: MaterialSearchResult[];
+  quiz?: QuizQuestion[] | null;
 }
 
 export interface LlmStatus {

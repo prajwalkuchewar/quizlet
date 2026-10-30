@@ -1,7 +1,8 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
+import ReactMarkdown, { Components } from "react-markdown";
 import { askMaterials } from "../api/materialService";
 import { getErrorMessage } from "../helper/ErrorHandler";
-import { MaterialSearchResult } from "../models/Study";
+import { MaterialSearchResult, QuizQuestion } from "../models/Study";
 
 type ChatMessage = {
   id: number;
@@ -9,6 +10,7 @@ type ChatMessage = {
   kind?: "answer" | "fallback" | "error" | "greeting";
   text: string;
   sources?: MaterialSearchResult[];
+  quiz?: QuizQuestion[];
   question?: string;
   typing?: boolean;
 };
@@ -27,6 +29,91 @@ const SUGGESTIONS = [
 ];
 const SLOW_HINT_MS = 8000;
 
+const markdownComponents: Components = {
+  p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
+  strong: ({ children }) => <strong className="font-bold">{children}</strong>,
+  ul: ({ children }) => <ul className="mb-2 list-disc pl-5 space-y-1">{children}</ul>,
+  ol: ({ children }) => <ol className="mb-2 list-decimal pl-5 space-y-1">{children}</ol>,
+  h1: ({ children }) => <p className="mt-2 mb-1 text-lg font-bold">{children}</p>,
+  h2: ({ children }) => <p className="mt-2 mb-1 text-base font-bold">{children}</p>,
+  h3: ({ children }) => <p className="mt-2 mb-1 font-bold">{children}</p>,
+};
+
+const QUIZ_LABELS: Record<QuizQuestion["type"], string> = {
+  multiple_choice: "Multiple choice",
+  true_false: "True or false",
+  short_answer: "Short answer",
+};
+
+const QuizCard = ({ item, index }: { item: QuizQuestion; index: number }) => {
+  const [selected, setSelected] = useState<string | null>(null);
+  const [revealed, setRevealed] = useState(false);
+  const isChoice = item.type !== "short_answer";
+  const answered = isChoice ? selected !== null : revealed;
+  const correct = selected === item.answer;
+
+  return (
+    <div className="p-4 bg-white border-2 border-blue-200 text-blue-950">
+      <p className="text-xs font-bold uppercase text-blue-800">
+        Question {index + 1} · {QUIZ_LABELS[item.type]}
+      </p>
+      <p className="mt-1 font-bold">{item.question}</p>
+
+      {isChoice ? (
+        <div className="mt-3 grid gap-2">
+          {item.options.map((option) => {
+            let style = "bg-white border-blue-200 hover:bg-yellow-100";
+            if (answered && option === item.answer) style = "bg-green-100 border-green-600";
+            else if (answered && option === selected) style = "bg-red-100 border-red-600";
+            return (
+              <button
+                key={option}
+                type="button"
+                disabled={answered}
+                onClick={() => setSelected(option)}
+                className={`px-3 py-2 text-left border-2 disabled:cursor-default ${style}`}
+              >
+                {option}
+              </button>
+            );
+          })}
+        </div>
+      ) : revealed ? null : (
+        <button
+          type="button"
+          onClick={() => setRevealed(true)}
+          className="mt-3 px-3 py-1 font-bold bg-blue-800 text-blue-200 hover:bg-yellow-500 hover:text-blue-800"
+        >
+          Show answer
+        </button>
+      )}
+
+      {answered && (
+        <div className="mt-3 text-sm">
+          {isChoice ? (
+            <p className={`font-bold ${correct ? "text-green-800" : "text-red-800"}`}>
+              {correct ? "Correct!" : `Not quite. The answer is ${item.answer}.`}
+            </p>
+          ) : (
+            <p className="p-2 bg-green-100 border-2 border-green-600">
+              <span className="font-bold">Model answer:</span> {item.answer}
+            </p>
+          )}
+          {item.explanation && <p className="mt-1 text-blue-900">{item.explanation}</p>}
+        </div>
+      )}
+    </div>
+  );
+};
+
+const QuizCards = ({ quiz }: { quiz: QuizQuestion[] }) => (
+  <div className="mt-3 space-y-3">
+    {quiz.map((item, index) => (
+      <QuizCard key={index} item={item} index={index} />
+    ))}
+  </div>
+);
+
 const TypedText = ({ text, onDone }: { text: string; onDone: () => void }) => {
   const [shown, setShown] = useState(0);
 
@@ -41,7 +128,7 @@ const TypedText = ({ text, onDone }: { text: string; onDone: () => void }) => {
 
   return (
     <>
-      {text.slice(0, shown)}
+      <ReactMarkdown components={markdownComponents}>{text.slice(0, shown)}</ReactMarkdown>
       {shown < text.length && <span className="animate-pulse">▍</span>}
     </>
   );
@@ -100,7 +187,7 @@ const MaterialChat = ({ hasMaterials, aiAvailable }: MaterialChatProps) => {
       add({
         role: "assistant",
         kind: "error",
-        text: "The AI model is offline, so I can't answer right now. Start Ollama and try again.",
+        text: "The AI model is unavailable, so I can't answer right now. Please try again shortly.",
         question,
       });
       return;
@@ -117,6 +204,7 @@ const MaterialChat = ({ hasMaterials, aiAvailable }: MaterialChatProps) => {
           kind: "answer",
           text: result.answer,
           sources: result.sources,
+          quiz: result.quiz?.length ? result.quiz : undefined,
           typing: true,
         });
       }
@@ -197,13 +285,14 @@ const MaterialChat = ({ hasMaterials, aiAvailable }: MaterialChatProps) => {
 
           return (
             <div key={m.id} className="max-w-[80%] p-4 bg-white border-2 border-blue-200 text-blue-950">
-              <p className="whitespace-pre-wrap">
+              <div className="text-left">
                 {m.typing ? (
                   <TypedText text={m.text} onDone={() => finishTyping(m.id)} />
                 ) : (
-                  m.text
+                  <ReactMarkdown components={markdownComponents}>{m.text}</ReactMarkdown>
                 )}
-              </p>
+              </div>
+              {m.quiz && !m.typing && <QuizCards quiz={m.quiz} />}
               {m.sources && m.sources.length > 0 && !m.typing && (
                 <details className="mt-2 text-sm">
                   <summary className="font-bold cursor-pointer text-blue-800">
