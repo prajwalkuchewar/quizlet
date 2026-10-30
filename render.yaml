@@ -1,0 +1,20 @@
+# Render Blueprint for the backend API. PostgreSQL is hosted on Supabase and the client on Vercel.
+services:
+  - type: web
+    name: quizlet-backend
+    runtime: docker
+    rootDir: quizlet-backend
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /health
+    plan: free
+    envVars:
+      - key: DATABASE_URL
+        sync: false # Supabase session pooler URL (postgresql://...)
+      - key: JWT_SECRET_KEY
+        generateValue: true
+      - key: GROQ_API_KEY
+        sync: false
+      - key: CORS_ORIGINS
+        sync: false # Vercel URL, e.g. https://your-app.vercel.app
+      - key: LLM_CHAT_MODEL
+        value: openai/gpt-oss-20b
