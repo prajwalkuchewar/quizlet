@@ -16,22 +16,6 @@ services:
       retries: 20
     restart: unless-stopped
 
-  ollama:
-    image: alpine/ollama:latest
-    volumes:
-      - ollama:/root/.ollama
-    restart: unless-stopped
-
-  # One-shot job that downloads the configured models into the ollama volume.
-  ollama-models:
-    image: alpine/ollama:latest
-    entrypoint: ["sh", "-c"]
-    command:
-      - "OLLAMA_HOST=http://ollama:11434 ollama pull llama3.2 && OLLAMA_HOST=http://ollama:11434 ollama pull nomic-embed-text"
-    depends_on:
-      - ollama
-    restart: "no"
-
   backend:
     image: ${DOCKERHUB_NAMESPACE:-prajwal018}/quizlet-backend:${IMAGE_TAG:-latest}
     env_file:
@@ -41,14 +25,12 @@ services:
       JWT_SECRET_KEY: ${JWT_SECRET_KEY:-demo-only-jwt-secret-change-me-0123456789}
       CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost}
       DATABASE_URL: postgresql+psycopg://quizlet:${POSTGRES_PASSWORD:-quizlet-demo-password}@db:5432/quizlet
-      LLM_BASE_URL: http://ollama:11434
+      GROQ_API_KEY: ${GROQ_API_KEY:?Set GROQ_API_KEY in .env}
     ports:
       - "8000:8000"
     depends_on:
       db:
         condition: service_healthy
-      ollama:
-        condition: service_started
     restart: unless-stopped
 
   web:
@@ -61,4 +43,3 @@ services:
 
 volumes:
   pgdata:
-  ollama:
