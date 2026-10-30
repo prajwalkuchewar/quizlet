@@ -7,9 +7,9 @@ class Settings(BaseSettings):
     jwt_secret_key: str = Field(min_length=32)
     jwt_access_token_minutes: int = 30
     cors_origins: str = "http://localhost:5173"
-    llm_base_url: str = "http://localhost:11434"
-    llm_chat_model: str = "llama3.2"
-    llm_embedding_model: str = "nomic-embed-text"
+    llm_base_url: str = "https://api.groq.com/openai/v1"
+    llm_chat_model: str = "openai/gpt-oss-20b"
+    groq_api_key: str = ""
     llm_request_timeout_seconds: int = 180
     llm_max_concurrency: int = Field(default=1, ge=1)
     llm_circuit_failure_threshold: int = 3

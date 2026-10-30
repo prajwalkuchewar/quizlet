@@ -78,7 +78,7 @@ def test_repeated_llm_failures_trip_the_breaker(monkeypatch):
         return info.value.status_code
 
     assert asyncio.run(scenario()) == 503
-    assert calls["count"] == 2  # the open breaker rejects the third call without contacting Ollama
+    assert calls["count"] == 2  # the open breaker rejects the third call without contacting Groq
 
 
 def test_fixed_window_limiter_blocks_over_limit_and_isolates_keys():

@@ -29,7 +29,7 @@ app = FastAPI(
     title="Quizlet Learning API",
     description=(
         "One FastAPI application with auth, question bank, materials, quiz, flashcard, and LLM endpoints. "
-        "The LLM endpoints call Ollama for embeddings and generation. "
+        "The LLM endpoints call Groq (openai/gpt-oss-20b) for answers and flashcards; retrieval is keyword-based. "
         "Swagger UI is available at `/docs` and the OpenAPI schema at `/openapi.json`."
     ),
     version="1.1.0",
@@ -39,7 +39,7 @@ app = FastAPI(
         {"name": "materials", "description": "User-owned material ingestion and semantic search."},
         {"name": "quiz", "description": "Quiz catalog, admin quiz creation, and scored attempts."},
         {"name": "flashcards", "description": "Generate, study, and review material-grounded flashcards."},
-        {"name": "llm", "description": "Health/status endpoint for the Ollama integration."},
+        {"name": "llm", "description": "Health/status endpoint for the Groq integration."},
     ],
     lifespan=lifespan,
 )
@@ -65,7 +65,7 @@ app.include_router(quizzes.router)
 app.include_router(llm.router)
 
 
-@app.get("/health", summary="Liveness and dependency health (database, Ollama)")
+@app.get("/health", summary="Liveness and dependency health (database, Groq)")
 def health():
     try:
         with engine.connect() as connection:

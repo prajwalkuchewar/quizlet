@@ -1,7 +1,7 @@
-"""Failsafes around Ollama calls: concurrency limit, circuit breaker, deadline, and disconnect cancellation.
+"""Failsafes around LLM calls: concurrency limit, circuit breaker, deadline, and disconnect cancellation.
 
-Ollama processes requests serially on a single model, so the semaphore keeps requests from piling up behind
-each other. Cancelling the task closes the HTTP connection, which stops Ollama from generating for a client that
+The semaphore keeps requests from piling up and from exceeding provider rate limits.
+Cancelling the task closes the HTTP connection, which stops generation for a client that
 has already gone away.
 """
 import asyncio
