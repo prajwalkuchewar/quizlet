@@ -86,9 +86,18 @@ class MaterialSearchHit(BaseModel):
     similarity: float
 
 
+class QuizQuestion(BaseModel):
+    type: Literal["multiple_choice", "true_false", "short_answer"]
+    question: str
+    options: list[str] = []
+    answer: str
+    explanation: str = ""
+
+
 class MaterialAskOutput(BaseModel):
     answer: str
     sources: list[MaterialSearchHit]
+    quiz: list[QuizQuestion] | None = None
 
 
 class GenerateFlashcardsInput(BaseModel):
