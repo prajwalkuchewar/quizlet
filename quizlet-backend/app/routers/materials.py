@@ -25,6 +25,15 @@ from app.services.rate_limit import limit_by_user
 router = APIRouter(prefix="/questions/materials", tags=["materials"])
 
 
+def extract_pdf_text(raw: bytes) -> str:
+    from io import BytesIO
+
+    from pypdf import PdfReader
+
+    reader = PdfReader(BytesIO(raw))
+    return "\n".join(page.extract_text() or "" for page in reader.pages)
+
+
 def material_out(material: Material) -> MaterialOut:
     return MaterialOut(
         id=material.id,
@@ -83,12 +92,8 @@ async def upload_material(
             status_code=413, detail="Uploaded file exceeds the size limit"
         )
     if extension == "pdf":
-        from io import BytesIO
-        from pypdf import PdfReader
-
         try:
-            reader = PdfReader(BytesIO(raw))
-            content = "\n".join(page.extract_text() or "" for page in reader.pages)
+            content = await run_in_threadpool(extract_pdf_text, raw)
         except Exception as exc:
             raise HTTPException(
                 status_code=422, detail="Could not read this PDF"

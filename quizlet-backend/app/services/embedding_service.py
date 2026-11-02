@@ -12,6 +12,8 @@ import threading
 from app.config import settings
 
 DIMENSIONS = 384
+# Small batches keep peak memory low on constrained hosts such as the Render free tier (512 MB).
+EMBED_BATCH_SIZE = 16
 
 _local_model = None
 _local_model_lock = threading.Lock()
@@ -33,7 +35,8 @@ def _get_local_model():
 
 def _local_embeddings(texts: list[str]) -> list[list[float]]:
     try:
-        vectors = [[float(value) for value in vector] for vector in _get_local_model().embed(texts)]
+        vectors = [[float(value) for value in vector]
+                   for vector in _get_local_model().embed(texts, batch_size=EMBED_BATCH_SIZE)]
     except Exception as exc:  # model download/load/inference failures surface as one provider error
         raise RuntimeError(f"Local embedding model unavailable: {exc}") from exc
     if len(vectors) != len(texts) or any(len(vector) != DIMENSIONS for vector in vectors):
