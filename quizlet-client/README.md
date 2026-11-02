@@ -1,45 +1,28 @@
 # Quizlet client
 
-React + Vite + TypeScript + Tailwind frontend for the Quizlet backend. It covers login and signup, quizzes with saved attempts, material-based flashcards, History, Achievements, Settings, and a light/dark theme.
+React single-page app built with Vite and Tailwind CSS. The codebase uses both JavaScript (`.jsx`) and TypeScript (`.tsx`); it is not fully migrated to TypeScript. The full application overview and setup are in the [repository README](../README.md).
 
 ## Run locally
 
-Start the backend first (see [quizlet-backend/README.md](../quizlet-backend/README.md)). Then, from this directory:
+The client runs as part of the Docker Compose stack from the repository root; see the [repository README](../README.md#local-setup). The app is served at `http://localhost` (nginx), and it calls the API at `http://localhost:8000`.
 
-```powershell
-cd quizlet-client
-npm install
-npm run dev
-```
+## Useful scripts
 
-Open `http://localhost:5173`. Other scripts:
+- `npm ci` — install dependencies (used by the Docker build)
+- `npm run dev` — Vite development server, for UI work only; it is not the supported run path
+- `npm run build` — production bundle in `dist/`
+- `npm run preview` — serve the built bundle locally
+- `npm run lint` — ESLint
 
-- `npm run build` builds to `dist/`
-- `npm run preview` serves the production build
-- `npm run lint` runs ESLint
+## Main routes
 
-## Configuration
+- `/register`, `/login` — public account forms
+- `/` — protected home page
+- `/quiz`, `/attempt` — quiz catalog and attempts
+- `/materials` — add notes/documents and ask questions about them
+- `/flashcards`, `/flashcards/:setId` — generate and study flashcard sets
+- `/history`, `/achievements` — quiz history and study summaries
+- `/settings`, `/darkmode` — user preferences
+- `/generate`, `/addQue`, `/question` — admin-only quiz and question-bank tools
 
-`.env` holds the backend URLs. The defaults point at the backend on port 8000:
-
-```
-VITE_QUIZ_URL=http://localhost:8000/quiz
-VITE_QUESTION_URL=http://localhost:8000/questions
-VITE_AUTHENTICATION_URL=http://localhost:8000/auth
-VITE_MATERIALS_URL=http://localhost:8000/questions/materials
-VITE_FLASHCARDS_URL=http://localhost:8000/quiz/flashcards
-VITE_LLM_URL=http://localhost:8000/llm
-```
-
-Change these if the backend runs elsewhere. Vite reads them at startup, so restart `npm run dev` after editing.
-
-## Pages
-
-- `/quiz`: take any available quiz. Scores are saved on the server.
-- `/materials`: add notes or upload documents. Flashcards are generated from these.
-- `/generate`: create a flashcard set from your materials.
-- `/flashcards`: study sets. Defaults come from Settings.
-- `/history` and `/achievements`: your quiz attempts and flashcard sets, loaded from the backend.
-- `/settings`: account info and default flashcard count and difficulty (saved in this browser).
-- `/darkmode`: switch between light and dark theme (saved in this browser).
-- Creating quizzes is limited to admin accounts.
+The frontend reads API URLs from Vite environment variables. See `src/config/config.js`; set `VITE_*` values before starting/building if the backend is not at the local default. Vite embeds these values at build time.
