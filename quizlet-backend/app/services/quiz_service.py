@@ -9,7 +9,7 @@ from app.services.question_service import search_materials
 def prepare_flashcard_context(db: Session, owner: User, session_id: str, prompt: str, material_ids: list[int],
                               count: int):
     materials = (db.query(Material)
-                 .filter(Material.owner_id == owner.id, Material.session_id == session_id,
+                 .filter(Material.owner_id == owner.id,
                          Material.id.in_(material_ids)).all())
     if len(materials) != len(set(material_ids)):
         raise HTTPException(status_code=404, detail="One or more materials were not found")

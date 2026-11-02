@@ -118,7 +118,7 @@ def list_materials(
 ):
     materials = (
         db.query(Material)
-        .filter(Material.owner_id == user.id, Material.session_id == session_id)
+        .filter(Material.owner_id == user.id)
         .order_by(Material.id.desc())
         .all()
     )
@@ -139,7 +139,6 @@ def delete_material(
         .filter(
             Material.id == material_id,
             Material.owner_id == user.id,
-            Material.session_id == session_id,
         )
         .first()
     )

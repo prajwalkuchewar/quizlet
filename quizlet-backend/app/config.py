@@ -12,6 +12,7 @@ class Settings(BaseSettings):
     groq_api_key: str = ""
     llm_request_timeout_seconds: int = 180
     llm_max_concurrency: int = Field(default=1, ge=1)
+    llm_retry_attempts: int = Field(default=2, ge=1, le=3)
     llm_circuit_failure_threshold: int = 3
     llm_circuit_reset_seconds: int = 60
     rate_limit_login_per_minute: int = 10
@@ -21,6 +22,10 @@ class Settings(BaseSettings):
     material_chunk_chars: int = 1200
     material_chunk_overlap: int = 180
     material_max_upload_bytes: int = 10_000_000
+    # "local" runs an ONNX sentence-embedding model in-process; "hash" is a lexical test-only fallback.
+    embedding_provider: str = Field(default="local", pattern="^(local|hash)$")
+    embedding_local_model: str = "sentence-transformers/all-MiniLM-L6-v2"
+    embedding_cache_dir: str = ""
 
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 

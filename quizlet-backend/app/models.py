@@ -1,6 +1,7 @@
 from datetime import datetime, timezone
 
-from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, JSON, String, Table, Column, Text
+from pgvector.sqlalchemy import Vector
+from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, String, Table, Column, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 
@@ -79,7 +80,7 @@ class MaterialChunk(Base):
     material_id: Mapped[int] = mapped_column(ForeignKey("materials.id", ondelete="CASCADE"), index=True)
     chunk_index: Mapped[int] = mapped_column(Integer)
     content: Mapped[str] = mapped_column(Text)
-    embedding: Mapped[list[float]] = mapped_column(JSON)
+    embedding: Mapped[list[float]] = mapped_column(Vector(384))
     material: Mapped[Material] = relationship(back_populates="chunks")
 
 
