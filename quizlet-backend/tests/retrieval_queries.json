@@ -1,0 +1,13 @@
+[
+  {"query": "Where does photosynthesis occur?", "expect": "chloroplasts", "kind": "direct"},
+  {"query": "Why are leaves green?", "expect": "reflects green light", "kind": "direct"},
+  {"query": "What happens during the first stage of photosynthesis?", "expect": "Light-dependent reactions", "kind": "direct"},
+  {"query": "How is glucose produced by plants?", "expect": "Calvin cycle", "kind": "paraphrase"},
+  {"query": "Which molecules provide energy for the Calvin cycle?", "expect": "ATP and NADPH", "kind": "direct"},
+  {"query": "What factors affect photosynthesis?", "expect": "temperature", "kind": "direct"},
+  {"query": "Why do plants need sunlight?", "expect": "light energy into chemical energy", "kind": "paraphrase"},
+  {"query": "What happens when water molecules are split?", "expect": "Water is split", "kind": "direct"},
+  {"query": "Explain the Calvin cycle", "expect": "Calvin cycle", "kind": "direct"},
+  {"query": "How does sunlight help plants make food?", "expect": "light energy into chemical energy", "kind": "paraphrase"},
+  {"query": "Explain the French Revolution", "expect": null, "kind": "unrelated"}
+]
