@@ -53,8 +53,8 @@ def _parse_flashcards(raw: str, count: int) -> list[dict[str, str]]:
             raise ValueError("missing cards array")
         clean = [{"front": str(card["front"]).strip(), "back": str(card["back"]).strip()}
                  for card in cards if isinstance(card, dict) and card.get("front") and card.get("back")]
-        if not clean:
-            raise ValueError("no usable cards returned")
+        if len(clean) < count:
+            raise ValueError("fewer cards than requested")
         return clean[:count]
     except (ValueError, TypeError, KeyError, json.JSONDecodeError) as exc:
         raise HTTPException(status_code=502, detail="LLM returned invalid flashcard JSON") from exc
@@ -75,7 +75,8 @@ async def answer_from_material_async(question: str, context: str) -> str:
                 "model": settings.llm_chat_model, "messages": messages, "max_tokens": 400,
             })
             response.raise_for_status()
-            content = (response.json()["choices"][0]["message"].get("content") or "").strip()
+            payload = response.json()
+            content = (payload["choices"][0]["message"].get("content") or "").strip()
     except (httpx.HTTPError, ValueError, KeyError, IndexError) as exc:
         detail = f"{type(exc).__name__}: {exc}" if str(exc) else type(exc).__name__
         raise HTTPException(status_code=503, detail=f"LLM service unavailable: {detail}") from exc
@@ -85,27 +86,17 @@ async def answer_from_material_async(question: str, context: str) -> str:
 
 
 async def generate_flashcards_async(prompt: str, context: str, count: int, difficulty: str) -> list[dict[str, str]]:
-    # Streamed on an async client: cancelling this task closes the connection, and Groq stops generating.
     messages = _flashcard_messages(prompt, context, count, difficulty)
-    parts: list[str] = []
-    try:
-        async with httpx.AsyncClient(timeout=settings.llm_request_timeout_seconds) as client:
-            async with client.stream("POST", f"{_base_url()}/chat/completions", headers=_headers(), json={
-                "model": settings.llm_chat_model, "stream": True, "messages": messages,
-                "response_format": {"type": "json_object"},
-            }) as response:
-                response.raise_for_status()
-                async for line in response.aiter_lines():
-                    if not line.startswith("data:"):
-                        continue
-                    data = line[5:].strip()
-                    if data == "[DONE]":
-                        break
-                    choices = json.loads(data).get("choices") or [{}]
-                    parts.append(choices[0].get("delta", {}).get("content") or "")
-    except (httpx.HTTPError, ValueError) as exc:
-        raise HTTPException(status_code=503, detail=f"LLM service unavailable: {exc}") from exc
-    return _parse_flashcards("".join(parts), count)
+    last_error = None
+    for attempt in range(settings.llm_retry_attempts):
+        try:
+            raw = await _complete_json_async(messages)
+            return _parse_flashcards(raw, count)
+        except HTTPException as exc:
+            last_error = exc
+            if attempt + 1 < settings.llm_retry_attempts:
+                messages.append({"role": "user", "content": "Your previous response was invalid. Return only valid JSON with the requested cards."})
+    raise last_error or HTTPException(status_code=502, detail="LLM returned invalid flashcard JSON")
 
 
 QUIZ_TYPES = {"multiple_choice", "true_false", "short_answer"}
@@ -128,7 +119,9 @@ async def _complete_json_async(messages: list[dict[str, str]]) -> str:
                 "response_format": {"type": "json_object"},
             })
             response.raise_for_status()
-            return (response.json()["choices"][0]["message"].get("content") or "").strip()
+            payload = response.json()
+            content = (payload["choices"][0]["message"].get("content") or "").strip()
+            return content
     except (httpx.HTTPError, ValueError, KeyError, IndexError) as exc:
         raise HTTPException(status_code=503, detail=f"LLM service unavailable: {exc}") from exc
 
@@ -162,7 +155,7 @@ def _parse_quiz(raw: str, count: int) -> list[dict[str, object]]:
                 answer = match
             clean.append({"type": kind, "question": question, "options": options, "answer": answer,
                           "explanation": str(item.get("explanation") or "").strip()})
-        if not clean:
+        if len(clean) < count:
             raise ValueError("no usable questions returned")
         return clean[:count]
     except (ValueError, TypeError, AttributeError, json.JSONDecodeError) as exc:
@@ -182,5 +175,13 @@ async def generate_quiz_async(context: str, count: int) -> list[dict[str, object
         {"role": "system", "content": instruction},
         {"role": "user", "content": f"Study material:\n{context[:24000]}"},
     ]
-    return _parse_quiz(await _complete_json_async(messages), count)
+    last_error = None
+    for attempt in range(settings.llm_retry_attempts):
+        try:
+            return _parse_quiz(await _complete_json_async(messages), count)
+        except HTTPException as exc:
+            last_error = exc
+            if attempt + 1 < settings.llm_retry_attempts:
+                messages.append({"role": "user", "content": "Your previous response failed validation. Return only valid JSON matching the required schema."})
+    raise last_error or HTTPException(status_code=502, detail="LLM returned invalid quiz JSON")
 

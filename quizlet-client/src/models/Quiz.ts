@@ -25,10 +25,6 @@ export interface QuizResponse {
   id: number;
   response: string;
 }
-export interface QuizScore {
-  score: number;
-}
-
 export interface QuizAttempt {
   id: number;
   quizId: number | null;

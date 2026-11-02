@@ -9,7 +9,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from starlette.middleware.base import BaseHTTPMiddleware
 
 from app.config import settings
-from app.database import Base, engine
+from app.database import Base, create_vector_index, engine, prepare_database
 from app import models  # noqa: F401 - registers mapped models before create_all
 from app.routers import auth, llm, materials, questions, quizzes
 from app.services.llm_guard import breaker
@@ -21,7 +21,9 @@ logger = logging.getLogger("quizlet")
 
 @asynccontextmanager
 async def lifespan(_app: FastAPI):
+    prepare_database()
     Base.metadata.create_all(bind=engine)
+    create_vector_index()
     yield
 
 
@@ -29,7 +31,7 @@ app = FastAPI(
     title="Quizlet Learning API",
     description=(
         "One FastAPI application with auth, question bank, materials, quiz, flashcard, and LLM endpoints. "
-        "The LLM endpoints call Groq (openai/gpt-oss-20b) for answers and flashcards; retrieval is keyword-based. "
+        "The LLM endpoints call Groq (openai/gpt-oss-20b) for answers and flashcards; retrieval uses pgvector. "
         "Swagger UI is available at `/docs` and the OpenAPI schema at `/openapi.json`."
     ),
     version="1.1.0",
