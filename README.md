@@ -133,20 +133,6 @@ npm run lint
 
 GitHub Actions runs backend compilation and tests, backend Docker build, and client production build on pushes and pull requests. On pushes to `main`, it publishes backend and client Docker images to Docker Hub when repository secrets `DOCKERHUB_USERNAME` and `DOCKERHUB_TOKEN` are configured. The optional repository variable `VITE_API_BASE` sets the client API base used in that image build.
 
-## Honest scope and current limitations
-
-These are useful interview talking points because they show the boundaries of the current implementation:
-
-- Retrieval uses pgvector cosine distance over local `all-MiniLM-L6-v2` embeddings by default. The response field named `similarity` is a normalized distance score, not a calibrated probability. Changing the embedding provider or model requires re-embedding stored chunks: `docker compose exec backend python -m app.reembed`.
-- PDF support extracts selectable text only; scanned documents need OCR. Very large corpora would need more efficient indexed retrieval and likely a vector or hybrid search design.
-- The model can return inaccurate or malformed content. Structured output is parsed and validated, but generated questions/cards still need human review; source passages are evidence, not a factuality guarantee.
-- Material records are owned by the user and survive subsequent logins and logout. The legacy session ID remains in tokens for compatibility but is no longer a retention boundary.
-- Structured generation retries malformed output. Retrieval quality is checked with `quizlet-backend/app/retrieval_check.py` against the protocol in `quizlet-backend/tests/RETRIEVAL_PROTOCOL.md`.
-- Signup always creates standard users. Admin access is granted only by setting `users.role` to `ADMIN` directly in the database, e.g. `UPDATE users SET role = 'ADMIN' WHERE username = 'your-user';`.
-- Rate-limit counters and the LLM concurrency limiter are in-process. Rate limiting is not shared across workers/instances; a horizontally scaled deployment needs a shared store such as Redis.
-- SQLAlchemy creates tables at app startup. A production evolution should add Alembic migrations, deployment-specific secrets, and operational monitoring.
-- The Compose file includes demo defaults and publishes the API port. Do not expose the demo configuration publicly; set strong secrets, restrict network access, and review deployment settings first.
-
 ## Repository layout
 
 ```text
