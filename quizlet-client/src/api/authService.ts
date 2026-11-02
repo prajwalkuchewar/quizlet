@@ -29,7 +29,6 @@ export const registerAPI = async (
   lastname: string,
   username: string,
   password: string,
-  role: string,
 ) => {
   try {
     const data = await axios.post<UserProfileToken>(VITE_SIGNUP_URL, {
@@ -37,7 +36,6 @@ export const registerAPI = async (
       lastname: lastname,
       username: username,
       password: password,
-      role: role,
     });
     return data;
   } catch (error) {

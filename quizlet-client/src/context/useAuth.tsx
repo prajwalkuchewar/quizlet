@@ -14,7 +14,6 @@ type UserContextType = {
     lastname: string,
     username: string,
     password: string,
-    role: string,
   ) => Promise<void>;
   loginUser: (username: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
@@ -143,9 +142,8 @@ export const UserProvider = ({ children }: Props) => {
     lastname: string,
     username: string,
     password: string,
-    role: string,
   ) => {
-    await registerAPI(firstname, lastname, username, password, role)
+    await registerAPI(firstname, lastname, username, password)
       .then((res) => {
         if (res) {
           toast.success("Account Created Successfully!");
