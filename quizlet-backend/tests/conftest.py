@@ -3,6 +3,8 @@ import os
 # Set before the app is imported. Database-backed tests run only when TEST_DATABASE_URL is provided,
 # so the tests never touch the application database by default.
 os.environ.setdefault("JWT_SECRET_KEY", "test-only-secret-key-that-is-long-enough-for-hs256")
+# Hash embeddings keep the default suite fast and offline; semantic tests opt in to the real model.
+os.environ.setdefault("EMBEDDING_PROVIDER", "hash")
 os.environ.setdefault("DATABASE_URL", os.environ.get("TEST_DATABASE_URL", "postgresql+psycopg://test:test@127.0.0.1:1/test"))
 
 import pytest  # noqa: E402

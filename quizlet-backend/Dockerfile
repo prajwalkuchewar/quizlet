@@ -2,17 +2,23 @@ FROM python:3.12-slim
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
-    PIP_NO_CACHE_DIR=1
+    PIP_NO_CACHE_DIR=1 \
+    EMBEDDING_CACHE_DIR=/opt/embedding-models
 
 WORKDIR /app
 
 COPY requirements.txt .
 RUN pip install -r requirements.txt
 
-COPY app ./app
-
-RUN useradd --create-home appuser
+RUN useradd --create-home appuser \
+    && mkdir -p "$EMBEDDING_CACHE_DIR" \
+    && chown appuser "$EMBEDDING_CACHE_DIR"
 USER appuser
+
+# Bake the embedding model into the image (owned by appuser) so containers never download it at runtime.
+RUN python -c "import os; from fastembed import TextEmbedding; TextEmbedding('sentence-transformers/all-MiniLM-L6-v2', cache_dir=os.environ['EMBEDDING_CACHE_DIR'])"
+
+COPY app ./app
 
 EXPOSE 8000
 

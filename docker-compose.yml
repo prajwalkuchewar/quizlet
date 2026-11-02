@@ -2,7 +2,9 @@ name: quizlet
 
 services:
   db:
-    image: postgres:16-alpine
+    image: pgvector/pgvector:pg16
+    ports:
+      - '5433:5432'
     environment:
       POSTGRES_DB: quizlet
       POSTGRES_USER: quizlet
@@ -10,14 +12,14 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U quizlet -d quizlet"]
+      test: ['CMD-SHELL', 'pg_isready -U quizlet -d quizlet']
       interval: 5s
       timeout: 5s
       retries: 20
     restart: unless-stopped
 
   backend:
-    image: ${DOCKERHUB_NAMESPACE:-prajwal018}/quizlet-backend:${IMAGE_TAG:-latest}
+    build: ./quizlet-backend
     env_file:
       - path: .env
         required: false
@@ -27,16 +29,19 @@ services:
       DATABASE_URL: postgresql+psycopg://quizlet:${POSTGRES_PASSWORD:-quizlet-demo-password}@db:5432/quizlet
       GROQ_API_KEY: ${GROQ_API_KEY:?Set GROQ_API_KEY in .env}
     ports:
-      - "8000:8000"
+      - '8000:8000'
     depends_on:
       db:
         condition: service_healthy
     restart: unless-stopped
 
   web:
-    image: ${DOCKERHUB_NAMESPACE:-prajwal018}/quizlet-client:${IMAGE_TAG:-latest}
+    build:
+      context: ./quizlet-client
+      args:
+        VITE_API_BASE: http://localhost:8000
     ports:
-      - "80:80"
+      - '80:80'
     depends_on:
       - backend
     restart: unless-stopped
