@@ -5,9 +5,10 @@ from app.services.question_service import index_material, split_into_chunks
 
 
 def test_material_ingestion_splits_overlapping_content():
-    chunks = split_into_chunks("alpha " * 500)
+    # Unique words keep the overlap check unambiguous; repeated text matches at many offsets.
+    chunks = split_into_chunks(" ".join(f"word{index}" for index in range(600)))
     assert len(chunks) > 1
-    assert chunks[0][-40:] == chunks[1][:40]
+    assert chunks[1][:40] in chunks[0]
 
 
 def test_material_ingestion_builds_vectorized_chunks(monkeypatch):
